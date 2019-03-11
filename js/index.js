@@ -21,35 +21,12 @@ function HeaderCell(config, pNode) {
         let el = document.createElement("li");
         this.txtEl = document.createElement("span");
         el.appendChild(this.txtEl);
-        this.splitA = document.createElement("div");
-        this.splitA.classList.add("header-split-a");
-        el.appendChild(this.splitA);
-        this.splitB = document.createElement("div");
-        this.splitB.classList.add("header-split-b");
-        el.appendChild(this.splitB);
+        this.split = document.createElement("div");
+        this.split.classList.add("header-split");
+        el.appendChild(this.split);
         this.setIndex.call(this.txtEl, config.index);
         el.data = config;
-        el.addEventListener("click", e => {
 
-            // if(config.headertype === 'top') {
-            //     config.spread.selected = Array(999).fill(null).map((i, index) => ([index, config.index - 1]));
-            //     config.spread.selectedArea.type = 'col';
-            //     config.spread.selectedArea.x = 0;
-            //     config.spread.selectedArea.y = config.index - 1;
-            //     config.spread.selectedArea.x2 = 999;
-            //     config.spread.selectedArea.y2 = config.index - 1;
-            // } else {
-            //     config.spread.selected = Array(999).fill(null).map((i, index) => ([config.index - 1, index]));
-            //     config.spread.selectedArea.type = 'row';
-            //     config.spread.selectedArea.x = config.index - 1;
-            //     config.spread.selectedArea.y = 0;
-            //     config.spread.selectedArea.x2 = config.index - 1;
-            //     config.spread.selectedArea.y2 = 999;
-            // }
-
-            // config.spread.refreshSelected();
-        })
-        
         if(parentNode) {
             parentNode.appendChild(el);
         }
@@ -79,7 +56,7 @@ function HeaderCell(config, pNode) {
             }
         }
 
-        let headIndex = config.spread.selected.findIndex(([x, y]) => 
+        let headIndex = config.spread.selected.findIndex(([x, y]) =>
             config.headertype === 'left' ? index === x : index === y
         );
 
@@ -167,15 +144,6 @@ function TextBox(config, pNode) {
     this.el = null;
     // this.call(new Input(config));
 
-    //输入事件
-    // this.onInput = function(event) {
-    //     config.spread.setData(
-    //         config.rowIndex,
-    //         config.colIndex,
-    //         event.target.value
-    //     );
-    // };
-
     this.isEdit = false;
 
     //按键事件
@@ -187,54 +155,13 @@ function TextBox(config, pNode) {
         );
     }
 
-    this.onFocus = function() {
-        // if(config.spread.active[0] !== config.rowIndex || config.spread.active[1] !== config.colIndex) {
-        //     // this.isEdit = true;
-        //     let _pnode = this.el.parentNode;
-        //     _pnode.classList.add('focus');
-        //     _pnode.removeChild(this.el);
-        //     _pnode.appendChild(this.render(_pnode));
-        //     this.el.value = config.spread.viewData[config.rowIndex][config.colIndex];
-        //     this.el.focus();
-        // }
-    }
-
-    this.onBlur = function() {
-        // if(config.spread.active[0] === config.rowIndex && config.spread.active[1] === config.colIndex) {
-        //     this.isEdit = false;
-        //     let _pnode = this.el.parentNode;
-        //     _pnode.classList.remove('focus');
-        //     _pnode.removeChild(this.el);
-        //     _pnode.appendChild(this.render(_pnode));
-        //     this.el.innerHTML = config.spread.viewData[config.rowIndex][config.colIndex].replace(/\n/g, '<br />');
-        // }
-    }
-
-    /**
-     * 鼠标按下选中单元格
-     */
-    // this.onMouseDown = function(e) {
-    //     let tdIndex = config.spread.selected.findIndex(([x, y]) => x === config.rowIndex && y === config.colIndex);
-    //     if(tdIndex >= 0) {
-    //         config.spread.active = [config.rowIndex, config.colIndex];
-    //     } else {
-    //         config.spread.selected = [[config.rowIndex, config.colIndex]];
-    //         config.spread.active = [];
-    //     }
-    //     config.spread.refreshSelected();
-    //     config.spread.header.top.refresh();
-    //     config.spread.header.left.refresh();
-    // }
-
-    /**
-     * 鼠标松开单元格
-     */
-    this.onMouseUp = function() {
-    }
+    let _class = [];
 
     this.refresh = function() {
         let colIndex = config.colIndex,
-            rowIndex = config.rowIndex;
+            rowIndex = config.rowIndex,
+            _pnode = this.el.parentNode;
+        _class = [];
         if(config.rowIndex >= config.spread.freezeArea.top) {
             rowIndex += config.spread.viewX;
         }
@@ -244,93 +171,91 @@ function TextBox(config, pNode) {
 
         //活动单元格
         if(config.spread.active[0] === rowIndex && config.spread.active[1] === colIndex) {
-            this.el.parentNode.classList.add('focus');
+            _class.push('focus');
             if(this.isEdit === false) {
-                let _pnode = this.el.parentNode;
                 _pnode.removeChild(this.el);
                 _pnode.appendChild(this.render(_pnode));
-                this.el.value = config.spread.viewData[rowIndex][colIndex];
+                this.el.value = config.spread.getData(rowIndex, colIndex);
                 setTimeout(() => this.el.focus(), 1);
                 this.isEdit = true;
             }
         } else {
-            this.el.parentNode.classList.remove('focus');
             if(this.isEdit === true) {
-                let _pnode = this.el.parentNode;
                 _pnode.removeChild(this.el);
                 _pnode.appendChild(this.render(_pnode));
-                this.el.innerHTML = config.spread.viewData[rowIndex][colIndex];
+                this.el.innerHTML = config.spread.getData(rowIndex, colIndex);
                 this.el.focus();
                 this.isEdit = false;
             }
             //选中单元格
             let td = config.spread.selected.find(([x, y]) => x === rowIndex && y === colIndex);
             if(td) {
-                this.el.parentNode.classList.add('selected');
-            } else {
-                this.el.parentNode.classList.remove('selected');
+                _class.push('selected');
             }
         }
 
         if (config.spread.selectedArea.type === 'cell') {
 
-            if (rowIndex == config.spread.selectedArea.x && 
+            if (rowIndex == config.spread.selectedArea.x &&
                 colIndex == config.spread.selectedArea.y) {
-                this.el.parentNode.classList.add('selected-area-init');
-            } else this.el.parentNode.classList.remove('selected-area-init');
-            
+                _class.push('selected-area-init');
+            }
+
             //设置当前范围
-            if (rowIndex == config.spread.selectedArea.minx && 
-                colIndex >= config.spread.selectedArea.miny && 
+            if (rowIndex == config.spread.selectedArea.minx &&
+                colIndex >= config.spread.selectedArea.miny &&
                 colIndex <= config.spread.selectedArea.maxy) {
-                this.el.parentNode.classList.add('selected-area-top');
-            } else this.el.parentNode.classList.remove('selected-area-top');
-            if (rowIndex == config.spread.selectedArea.maxx && 
-                colIndex >= config.spread.selectedArea.miny && 
+                _class.push('selected-area-top');
+            }
+            if (rowIndex == config.spread.selectedArea.maxx &&
+                colIndex >= config.spread.selectedArea.miny &&
                 colIndex <= config.spread.selectedArea.maxy) {
-                this.el.parentNode.classList.add('selected-area-bottom');
-            } else this.el.parentNode.classList.remove('selected-area-bottom');
-            
-            if (colIndex == config.spread.selectedArea.miny && 
-                rowIndex >= config.spread.selectedArea.minx && 
+                _class.push('selected-area-bottom');
+            }
+
+            if (colIndex == config.spread.selectedArea.miny &&
+                rowIndex >= config.spread.selectedArea.minx &&
                 rowIndex <= config.spread.selectedArea.maxx) {
-                this.el.parentNode.classList.add('selected-area-left');
-            } else this.el.parentNode.classList.remove('selected-area-left');
-            if (colIndex == config.spread.selectedArea.maxy && 
-                rowIndex >= config.spread.selectedArea.minx && 
+                _class.push('selected-area-left');
+            }
+            if (colIndex == config.spread.selectedArea.maxy &&
+                rowIndex >= config.spread.selectedArea.minx &&
                 rowIndex <= config.spread.selectedArea.maxx) {
-                this.el.parentNode.classList.add('selected-area-right');
-            } else this.el.parentNode.classList.remove('selected-area-right');
+                _class.push('selected-area-right');
+            }
 
         } else if (config.spread.selectedArea.type === 'row') {
 
-            if (rowIndex == config.spread.selectedArea.x && 
-                colIndex == 0) {
-                this.el.parentNode.classList.add('selected-area-init');
-            } else this.el.parentNode.classList.remove('selected-area-init');
-            
+            if (rowIndex == config.spread.selectedArea.x - 1 && colIndex == 0) {
+                _class.push('selected-area-init');
+            }
+
             //设置当前范围
             if (rowIndex == config.spread.selectedArea.minx - 1) {
-                this.el.parentNode.classList.add('selected-area-top');
-            } else this.el.parentNode.classList.remove('selected-area-top');
+                _class.push('selected-area-top');
+            }
             if (rowIndex == config.spread.selectedArea.maxx - 1) {
-                this.el.parentNode.classList.add('selected-area-bottom');
-            } else this.el.parentNode.classList.remove('selected-area-bottom');
+                _class.push('selected-area-bottom');
+            }
 
         } else if (config.spread.selectedArea.type === 'col') {
+            if (rowIndex == 0 && colIndex == config.spread.selectedArea.y - 1) {
+                _class.push('selected-area-init');
+            }
 
-            if (rowIndex == 0 && 
-                colIndex == config.spread.selectedArea.y) {
-                this.el.parentNode.classList.add('selected-area-init');
-            } else this.el.parentNode.classList.remove('selected-area-init');
-            
             //设置当前范围
             if (colIndex == config.spread.selectedArea.miny - 1) {
-                this.el.parentNode.classList.add('selected-area-left');
-            } else this.el.parentNode.classList.remove('selected-area-left');
+                _class.push('selected-area-left');
+            }
             if (colIndex == config.spread.selectedArea.maxy - 1) {
-                this.el.parentNode.classList.add('selected-area-right');
-            } else this.el.parentNode.classList.remove('selected-area-right');
+                _class.push('selected-area-right');
+            }
+        }
+
+        let _className = _class.join(' '),
+            _oldClassName = _pnode.className;
+        if(_className !== _oldClassName && (_className != '' || _oldClassName !== '')) {
+            _pnode.className = _className;
         }
     }
 
@@ -341,11 +266,9 @@ function TextBox(config, pNode) {
             el = document.createElement("textarea");
             el.type = "text";
             el.classList.add("data-txt-input");
+            el.onkeydown = this.onKeyPress;
         } else {
             el = document.createElement("span");
-            // el.onmousedown = this.onMouseDown.bind(this);
-            el.onmouseup = this.onMouseUp.bind(this);
-            // el.setAttribute('tabindex', '-1');
         }
 
         el.classList.add("data-txt");
@@ -353,11 +276,7 @@ function TextBox(config, pNode) {
         el.style.width = config.spread.getColWidth(config.colIndex) + 'px';
         el.style.height = config.spread.getRowHeight(config.rowIndex + config.spread.viewX) + 'px';
         el.data = config;
-        // el.onfocus = this.onFocus.bind(this);
-        // el.onblur = this.onBlur.bind(this);
-        // el.oninput = this.onInput;
-        el.onkeydown = this.onKeyPress;
-        config.spread.viewText[config.rowIndex + config.spread.viewX][config.colIndex] = this;
+        config.spread.viewText[config.rowIndex][config.colIndex] = this;
 
         if(parentNode) {
             parentNode.appendChild(el);
@@ -380,25 +299,15 @@ function TextBox(config, pNode) {
 function Cell(config, pNode) {
     this.el = null;
 
-    this.onClick = function() {
-        let td = config.spread.selected.find(([x, y]) => x === config.rowIndex && y === config.colIndex);
-        if(td) {
-            this.el.classList.add('focus');
-        } else {
-            this.el.classList.remove('focus');
-        }
-    }
-
     this.render = function(parentNode) {
         let el = document.createElement("td");
         el.data = config;
-        //el.onclick = this.onClick;
-        if(config.colIndex === config.spread.freezeArea.left) {
-            el.classList.add('cell-freeze-left');
-        }
-        if(config.rowIndex === config.spread.freezeArea.top) {
-            el.classList.add('cell-freeze-top');
-        }
+        // if(config.colIndex === config.spread.freezeArea.left) {
+        //     el.classList.add('cell-freeze-left');
+        // }
+        // if(config.rowIndex === config.spread.freezeArea.top) {
+        //     el.classList.add('cell-freeze-top');
+        // }
         // el.style.width = "100px";
         el.appendChild(new TextBox(config).render());
 
@@ -615,9 +524,20 @@ function Spread(config, pNode) {
     }
 
     //设置值
-    this.setData = function(x, y, value) {
+    this.setData = function(x, y, value = '') {
+        if(!this.viewData[x]) {
+            this.viewData[x] = [];
+        }
         this.viewData[x][y] = value;
-        this.viewText[x][y].el.value = value;
+        this.viewText[x - this.viewX][y - this.viewY].el.value = value;
+    }
+
+    //获取值
+    this.getData = function(x, y) {
+        if(!this.viewData[x] || this.viewData[x][y] === undefined) {
+            return '';
+        }
+        return this.viewData[x][y];
     }
 
     /**
@@ -716,19 +636,10 @@ function Spread(config, pNode) {
         this.viewText.forEach(row => row.forEach(cell => cell.refresh()));
     }
 
-    //区域滚动
-    this.scroll = function(e) {
-        // this.panels.left.scrollTop = e.target.scrollTop;
-        // this.header.el.parentNode.left.scrollTop = e.target.scrollTop;
-        // // this.panels.right.scrollTop = e.target.scrollTop;
-        // this.panels.top.scrollLeft = e.target.scrollLeft;
-        // this.header.el.parentNode.top.scrollLeft = e.target.scrollLeft;
-    }
-
     this.render = function(parentNode) {
         let el = document.createElement("div");
         el.classList.add('haku-spreadsheet');
-        el.data = config;
+        //el.data = config;
 
         //构造左侧头部
         let headerbodyleft = document.createElement("div");
@@ -782,120 +693,6 @@ function Spread(config, pNode) {
 
         fixedMain.appendChild(fixedMainBody);
         el.appendChild(fixedMain);
-        fixedMain.onscroll = this.scroll.bind(this);
-
-        //表格：上
-        // let fixedTop = document.createElement("div");
-        // this.panels.top = fixedTop;
-        // fixedTop.classList.add('haku-spreadsheet-fixed-top');
-        // let tableTop = new Table({
-        //     ...config,
-        //     spread: this,
-        //     freeze: 'top',
-        //     rowNum: this.rowNum,
-        //     colNum: this.colNum,
-        //     onInit() {
-        //         this.classList.add('haku-table', 'haku-table-fixed-top');
-        //     }
-        // }, fixedTop);
-        // el.appendChild(fixedTop);
-
-        //表格：左
-        // let fixedLeft = document.createElement("div");
-        // this.panels.left = fixedLeft;
-        // fixedLeft.classList.add('haku-spreadsheet-fixed-left');
-        // let tableLeft = new Table({
-        //     ...config,
-        //     spread: this,
-        //     freeze: 'left',
-        //     rowNum: this.rowNum,
-        //     colNum: this.colNum,
-        //     onInit() {
-        //         this.classList.add('haku-table', 'haku-table-fixed-left');
-        //     }
-        // }, fixedLeft);
-        // el.appendChild(fixedLeft);
-
-        // let fixedBottom = document.createElement("div");
-        // this.panels.bottom = fixedBottom;
-        // fixedBottom.classList.add('haku-spreadsheet-fixed-bottom');
-        // let tableBottom = new Table({
-        //     ...config,
-        //     spread: this,
-        //     rowNum: this.rowNum,
-        //     colNum: this.colNum
-        // }).render();
-        // tableBottom.classList.add('haku-table', 'haku-table-fixed-bottom');
-        // fixedBottom.appendChild(tableBottom);
-        // el.appendChild(fixedBottom);
-
-        //表格：右
-        // let fixedRight = document.createElement("div");
-        // this.panels.right = fixedRight;
-        // fixedRight.classList.add('haku-spreadsheet-fixed-right');
-        // let tableRight = new Table({
-        //     ...config,
-        //     spread: this,
-        //     rowNum: this.rowNum,
-        //     colNum: this.colNum
-        // }).render();
-        // tableRight.classList.add('haku-table', 'haku-table-fixed-right');
-        // fixedRight.appendChild(tableRight);
-
-        // // let fixedRightBody = document.createElement("div");
-        // // fixedRightBody.classList.add('haku-spreadsheet-fixed-right-body');
-        // // fixedRightBody.appendChild(tableRight);
-        // fixedRight.appendChild(tableRight);
-        // el.appendChild(fixedRight);
-
-        //表格：左上
-        // let fixedTopLeft = document.createElement("div");
-        // this.panels.topleft = fixedTopLeft;
-        // fixedTopLeft.classList.add('haku-spreadsheet-fixed-top-left');
-        // let tableTopLeft = new Table({
-        //     ...config,
-        //     spread: this,
-        //     freeze: 'topleft',
-        //     rowNum: this.rowNum,
-        //     colNum: this.colNum,
-        //     onInit() {
-        //         this.classList.add('haku-table', 'haku-table-fixed-top-left');
-        //     }
-        // }, fixedTopLeft);
-        // el.appendChild(fixedTopLeft);
-
-        //表格：右上
-        // let fixedTopRight = document.createElement("div");
-        // this.panels.topright = fixedTopRight;
-        // fixedTopRight.classList.add('haku-spreadsheet-fixed-top-right');
-        // let tableTopRight = new Table({
-        //     ...config,
-        //     spread: this,
-        //     freeze: 'topright',
-        //     rowNum: this.rowNum,
-        //     colNum: this.colNum
-        // }).render();
-        // tableTopRight.classList.add('haku-table', 'haku-table-fixed-top-right');
-        // fixedTopRight.appendChild(tableTopRight);
-        // el.appendChild(fixedTopRight);
-
-        // //左侧头部
-        // let elHeadLeft = document.createElement("div");
-        // elHeadLeft.classList.add('haku-header', 'haku-header-left');
-        // let elHeaderBodyLeft = document.createElement("div");
-        // elHeaderBodyLeft.classList.add('haku-header-body');
-        // //elHeaderBodyLeft
-        // elHeadLeft.appendChild(elHeaderBodyLeft);
-        // el.appendChild(elHeadLeft);
-
-        // //顶部头部
-        // let elHeadTop = document.createElement("div");
-        // elHeadTop.classList.add('haku-header', 'haku-header-top');
-        // let elHeaderBodyTop = document.createElement("div");
-        // elHeaderBodyTop.classList.add('haku-header-body');
-        // elHeadTop.appendChild(elHeaderBodyTop);
-        // el.appendChild(elHeadTop);
-
 
         let elScrollX = document.createElement("div");
         elScrollX.classList.add('haku-scroll', 'haku-scroll-x');
@@ -921,8 +718,8 @@ function Spread(config, pNode) {
             //data-txt
             if(e.target.classList.contains('data-txt')) {
                 this.setData(
-                    e.target.data.rowIndex,
-                    e.target.data.colIndex,
+                    e.target.data.rowIndex + this.viewX,
+                    e.target.data.colIndex + this.viewY,
                     e.target.value
                 );
             }
@@ -967,7 +764,7 @@ function Spread(config, pNode) {
         })
         //鼠标拖拽框选
         el.addEventListener('mousedown', e => {
-            if(!e.target || !e.target.data) {
+            if(!e.target || !e.target.data || e.buttons !== 1) {
                 return;
             }
             this.selectedArea.isStart = true;
@@ -976,12 +773,12 @@ function Spread(config, pNode) {
                     this.selectedArea.type = 'row';
                     this.selectedArea.x = e.target.data.index;
                     this.selectedArea.x2 = e.target.data.index;
-                    this.selected = Array(this.viewData[0].length).fill(null).map((i, index) => ([index, e.target.data.index]));
+                    this.selected = Array(this.viewData[0].length).fill(null).map((i, index) => ([e.target.data.index - 1, index]));
                 } else if(e.target.data.headertype === 'top') {
                     this.selectedArea.type = 'col';
                     this.selectedArea.y = e.target.data.index;
                     this.selectedArea.y2 = e.target.data.index;
-                    this.selected = Array(this.viewData.length).fill(null).map((i, index) => ([e.target.data.index, index]));
+                    this.selected = Array(this.viewData.length).fill(null).map((i, index) => ([index, e.target.data.index - 1]));
                 }
             } else {
                 this.selectedArea.type = 'cell';
@@ -997,7 +794,7 @@ function Spread(config, pNode) {
                 this.selectedArea.y = colIndex;
                 this.selectedArea.x2 = rowIndex;
                 this.selectedArea.y2 = colIndex;
-                
+
                 let tdIndex = this.selected.findIndex(([x, y]) => x === rowIndex && y === colIndex);
                 if(tdIndex >= 0 && this.selected.length === 1) {
                     this.selected = [[rowIndex, colIndex]];
@@ -1012,18 +809,30 @@ function Spread(config, pNode) {
             this.header.top.refresh();
             this.header.left.refresh();
         });
+
+        //节流参数
         el.addEventListener('mousemove', e => {
             if(this.selectedArea.isStart === true) {
                 if(!e.target || !e.target.data) {
                     return;
                 }
+                //验证和点击的选择类型是否相同
+                if(e.target.data.headertype) {
+                    if(e.target.data.headertype === 'left') if(this.selectedArea.type !== 'row') return;
+                    else if(e.target.data.headertype === 'top') if(this.selectedArea.type !== 'col') return;
+                } else if(this.selectedArea.type !== 'cell') return;
+
                 if(e.target.data.headertype) {
                     if(e.target.data.headertype === 'left') {
                         this.selectedArea.x2 = e.target.data.index;
-                        // this.selected = Array(this.viewData.length).fill(null).map((i, index) => ([index, e.target.data.index]));
+                        this.selected = [].concat.apply([], Array(this.viewData[0].length).fill(null).map((i, index) => {
+                            return (Array(this.selectedArea.maxx - this.selectedArea.minx + 1).fill(null).map((o, oIndex) => ([oIndex + this.selectedArea.minx - 1, index])))
+                        }))
                     } else if(e.target.data.headertype === 'top') {
                         this.selectedArea.y2 = e.target.data.index;
-                        // this.selected = Array(this.viewData[0].length).fill(null).map((i, index) => ([e.target.data.index, index]));
+                        this.selected = [].concat.apply([], Array(this.viewData.length).fill(null).map((i, index) => {
+                            return (Array(this.selectedArea.maxy - this.selectedArea.miny + 1).fill(null).map((o, oIndex) => ([index, oIndex + this.selectedArea.miny - 1])))
+                        }))
                     }
                 } else {
                     let colIndex = e.target.data.colIndex,
@@ -1047,7 +856,7 @@ function Spread(config, pNode) {
                     } else {
                     }
                 }
-                    
+
                 this.refreshSelected();
                 this.header.top.refresh();
                 this.header.left.refresh();
@@ -1101,7 +910,6 @@ function Spread(config, pNode) {
     (() => {
         _colWidth = new Array(this.rowNum).fill(_cellDefaultWidth);
         _rowHeight = new Array(this.colNum).fill(_cellDefaultHeight);
-        this.viewData = new Array(this.rowNum).fill(null).map(i => new Array(this.colNum).fill(''));
         this.viewText = new Array(this.rowNum).fill(null).map(i => []).map(i => new Array(this.colNum).fill('').map(i => []));
     })();
 
