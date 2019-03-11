@@ -40,6 +40,8 @@ body {
             margin: 0px;
 
             > li {
+                user-select: none;
+                position: relative;
                 list-style: none;
                 color: #666;
                 font-size: 12px;
@@ -49,6 +51,22 @@ body {
                 padding-bottom: 1px;
                 border-bottom: 1px solid #DDD;
                 border-right: 2px solid #EEE;
+                cursor: default;
+
+                &:after {
+                    content: '';
+                    position: absolute;
+                    cursor: url('data:application/octet-stream;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxMTFrMjIyPQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARUVF4kREROgyMjIrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjIyFGBgYO6kpKT/SEhI7TQ0NEEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAyMjJGMTExNzExMTcxMTE3MDAwIDY2NnhgYGDu6+vr/7m5uf9EREToMjIyPQAAAAAAAAAAAAAAADIyMj1GRkbIWVlZ6FlZWehycnLfa2tr4UtLS+9ISEjtu7u79Ofn5//Q0ND/pqam/zw8PPEwMDAgAAAAAAAAAAAzMzO9SUlJ+fPz8//m5ub/8vLy/8HBwf/Gxsb/9/f3////////////ycnJ/9bW1v+cnJz/Nzc37C8vLwwAAAAAMTExiVNTU+H///////////f39//w8PD////////////////////////////Gxsb/09PT/6urq/88PDzxMjIyYzAwMDNSUlLL4ODg////////////////////////////////////////////0NDQ/9zc3P/Gxsb/PDw88TIyMmMyMjIUVlZWvNbW1v////////////////////////////////////////////////+kpKT/PDw88S0tLRoAAAAANDQ0Az09PZZdXV35q6ur/4uLi/mGhobyiYmJ9YmJifWFhYX33Nzc///////r6+v/MzMz/zIyMkYAAAAAAAAAAAAAAAAxMTEQPT09lklJSaA9PT2WOTk5hjk5OYY2NjZ4Nzc37KSkpPn/////SUlJ+TExMWsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC8vL4GRkZH/jIyM/0FBQaoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxMTE3MzMz/01NTb4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADExMYkwMDAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP8/AAD/HwAA/g8AAMAHAAAAAwAAAAEAAAAAAAAAAAAAAAEAAAADAACABwAA/w8AAP8fAAD/nwAA//8AAA=='),auto;
+                    top: 0px;
+                    left: 0px;
+                    width: 100%;
+                    height: 100%;
+                }
+
+                &:hover {
+                    background-color: #b7d2ff;
+                    border-right: 2px solid #b7d2ff;
+                }
 
                 &.active {
                     border-right: 2px solid #448AFF;
@@ -57,6 +75,14 @@ body {
 
                 &:first-child {
                     border-top: 1px solid #DDD;
+                }
+
+                > .header-split-a {
+                    
+                }
+
+                > .header-split-a {
+                    
                 }
             }
         }
@@ -79,6 +105,8 @@ body {
             white-space: nowrap;
 
             > li {
+                user-select: none;
+                position: relative;
                 display: inline-block;
                 text-align: center;
                 list-style: none;
@@ -92,6 +120,22 @@ body {
                 border-right: 1px solid #DDD;
                 border-bottom: 2px solid #EEE;
                 vertical-align: top;
+                cursor: default;
+
+                &:after {
+                    content: '';
+                    position: absolute;
+                    cursor: url('data:application/octet-stream;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjIyYzIyMmMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALy8vDDw8PPE8PDzxLS0tGgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDAwIDc3N+yrq6v/xsbG/zw8PPEyMjJGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjIyPTw8PPGcnJz/09PT/93d3f+kpKT/MzMz/zExMW4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANDQ0QUREROimpqb/1tbW/8bGxv/Q0ND//////+vr6/9JSUn5QUFBqgAAAAAAAAAAAAAAAAAAAAAAAAAAMjIyK0hISO25ubn/0NDQ/8nJyf///////////////////////////4yMjP9NTU2+MDAwIAAAAAAAAAAAMjIyPUREROikpKT/6+vr/+fn5///////////////////////2tra/6SkpPmRkZH/MzMz/zIyMosAAAAAAAAAADIyMmlFRUXiYGBg7mBgYO67u7v0/////////////////////4WFhfc3NzfsMTExgzExMTcAAAAAAAAAAAAAAAAAAAAAAAAAADIyMhQ2NjZ4SEhI7ff39/////////////////+JiYn1NjY2eAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDAwIEtLS+/Gxsb/////////////////iYmJ9T09PYgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADExMTdra2vhwcHB//Ly8v///////////4aGhvIxMTGDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxMTE3cnJy3/Ly8v/39/f///////////+Li4v5QEBAlgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMTExN1lZWejm5ub/////////////////q6ur/0lJSaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADIyMkZZWVno8vLy///////g4OD/1tbW/11dXfk5OTmYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARkZGyElJSflTU1PhUlJSy1ZWVrxAQECWMTExEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADIyMj0zMzO9MTExgzAwMDMyMjIUNDQ0AwAAAAAAAAAAAAAAAAAAAAAAAAAA/n8AAPw/AAD4HwAA8A8AAOAHAADAAQAAgAEAAIADAADgDwAA8A8AAPAPAADwDwAA8A8AAPAPAAD4DwAA+B8AAA=='),auto;
+                    top: 0px;
+                    left: 0px;
+                    width: 100%;
+                    height: 100%;
+                }
+
+                &:hover {
+                    background-color: #b7d2ff;
+                    border-bottom: 2px solid #b7d2ff;
+                }
 
                 &.active {
                     border-bottom: 2px solid #448AFF;
@@ -233,6 +277,7 @@ body {
                 user-select: none;
                 padding-right: 1px;
                 padding-bottom: 1px;
+                cursor: cell;
 
                 &.cell-freeze-left {
                     border-left: 1px solid #888;
@@ -243,7 +288,6 @@ body {
 
                 &.selected {
                     background-color: #F1F1F1;
-                    box-shadow: 0px 0px 0px 2px white inset;
                     color: #333;
                 }
 
@@ -271,6 +315,19 @@ body {
 
                     &.selected-area-bottom {
                         border-bottom-right-radius: 4px;
+
+                        &:after {
+                            position: absolute;
+                            content: '';
+                            bottom: -5px;
+                            right: -5px;
+                            width: 6px;
+                            height: 6px;
+                            z-index: 1;
+                            border-radius: 1px;
+                            background-color: #67b0ec;
+                            border: 1px solid white;
+                        }
                     }
                 }
                 //选框：上
@@ -284,27 +341,21 @@ body {
                     padding-bottom: 0px;
                 }
 
+                //选框：原始位置
+                &.selected-area-init {
+                    background-color: white;
+                }
+
                 // &:focus-within,
                 &.focus {
-                    background-color: #e3efff;
+                    background-color: #f0f7ff;
                     box-shadow: 0 0 3px 1px rgba(16, 119, 255, 0.5);
                     z-index: 1;
                     border-radius: 4px;
                     border: none;
                     padding-top: 1px;
                     padding-left: 1px;
-
-                    &:after {
-                        position: absolute;
-                        content: '';
-                        bottom: -3px;
-                        right: -3px;
-                        width: 5px;
-                        height: 5px;
-                        z-index: 1;
-                        border-radius: 2px;
-                        background-color: #67b0ec;
-                    }
+                    cursor: text;
 
                     > .data-txt {
 
@@ -316,7 +367,6 @@ body {
                 }
 
                 > .data-txt {
-                    cursor: cell;
                     background-color: transparent;
                     display: inline-block;
                     padding: 1px 2px;
@@ -331,7 +381,6 @@ body {
                     font-family: 'Microsoft YaHei';
 
                     &.data-txt-input {
-                        cursor: text;
                         resize: none;
                         opacity: 0.0;
                         transition: opacity 0.1s;

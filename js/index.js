@@ -15,24 +15,74 @@ function numToString(numm) {
 
 function HeaderCell(config, pNode) {
     this.el = null;
+    this.txtEl = null;
 
     this.render = function(parentNode) {
         let el = document.createElement("li");
-        this.setIndex.call(el, config.index);
+        this.txtEl = document.createElement("span");
+        el.appendChild(this.txtEl);
+        this.splitA = document.createElement("div");
+        this.splitA.classList.add("header-split-a");
+        el.appendChild(this.splitA);
+        this.splitB = document.createElement("div");
+        this.splitB.classList.add("header-split-b");
+        el.appendChild(this.splitB);
+        this.setIndex.call(this.txtEl, config.index);
+        el.data = config;
+        el.addEventListener("click", e => {
+
+            // if(config.headertype === 'top') {
+            //     config.spread.selected = Array(999).fill(null).map((i, index) => ([index, config.index - 1]));
+            //     config.spread.selectedArea.type = 'col';
+            //     config.spread.selectedArea.x = 0;
+            //     config.spread.selectedArea.y = config.index - 1;
+            //     config.spread.selectedArea.x2 = 999;
+            //     config.spread.selectedArea.y2 = config.index - 1;
+            // } else {
+            //     config.spread.selected = Array(999).fill(null).map((i, index) => ([config.index - 1, index]));
+            //     config.spread.selectedArea.type = 'row';
+            //     config.spread.selectedArea.x = config.index - 1;
+            //     config.spread.selectedArea.y = 0;
+            //     config.spread.selectedArea.x2 = config.index - 1;
+            //     config.spread.selectedArea.y2 = 999;
+            // }
+
+            // config.spread.refreshSelected();
+        })
+        
         if(parentNode) {
             parentNode.appendChild(el);
         }
+
         return el;
     }
 
     //设置展示下标
     this.setIndex = function(index) {
-        (this.el || this).innerHTML = config.type === 'top' ? numToString(index) : index;
+        (this.txtEl || this).innerHTML = config.headertype === 'top' ? numToString(index) : index;
     }
 
     //更新状态
     this.refresh = function() {
-        let headIndex = config.spread.selected.findIndex(([x, y]) => config.type === 'left' ? x === config.index - 1 : y === config.index - 1);
+        let index = 0;
+        if(config.headertype === 'left') {
+            if(config.spread.freezeArea.top < config.index) {
+                index = config.index + config.spread.viewX - 1;
+            } else {
+                index = config.index - 1;
+            }
+        } else {
+            if(config.spread.freezeArea.left < config.index) {
+                index = config.index + config.spread.viewY - 1;
+            } else {
+                index = config.index - 1;
+            }
+        }
+
+        let headIndex = config.spread.selected.findIndex(([x, y]) => 
+            config.headertype === 'left' ? index === x : index === y
+        );
+
         if(headIndex >= 0) {
             this.el.classList.add('active');
         } else {
@@ -54,13 +104,13 @@ function HeaderList(config, pNode) {
 
     this.setStartIndex = function(startIndex) {
         this.data.forEach((i, index) => {
-            if(config.type === 'top') {
+            if(config.headertype === 'top') {
                 if(index < config.spread.freezeArea.left) {
                     i.setIndex(index + 1);
                 } else {
                     i.setIndex(startIndex + index + 1);
                 }
-            } else if(config.type === 'left') {
+            } else if(config.headertype === 'left') {
                 if(index < config.spread.freezeArea.top) {
                     i.setIndex(index + 1);
                 } else {
@@ -79,7 +129,7 @@ function HeaderList(config, pNode) {
     this.render = function(parentNode) {
         let el = document.createElement("ul");
         el.classList.add('header-list');
-        el.setAttribute('type', config.type);
+        el.setAttribute('type', config.headertype);
         el.data = config;
         Array(config.count).fill('').map((i, index) => {
             let item = new HeaderCell({
@@ -183,14 +233,23 @@ function TextBox(config, pNode) {
     }
 
     this.refresh = function() {
+        let colIndex = config.colIndex,
+            rowIndex = config.rowIndex;
+        if(config.rowIndex >= config.spread.freezeArea.top) {
+            rowIndex += config.spread.viewX;
+        }
+        if(config.colIndex >= config.spread.freezeArea.left) {
+            colIndex += config.spread.viewY;
+        }
+
         //活动单元格
-        if(config.spread.active[0] === config.rowIndex && config.spread.active[1] === config.colIndex) {
+        if(config.spread.active[0] === rowIndex && config.spread.active[1] === colIndex) {
             this.el.parentNode.classList.add('focus');
             if(this.isEdit === false) {
                 let _pnode = this.el.parentNode;
                 _pnode.removeChild(this.el);
                 _pnode.appendChild(this.render(_pnode));
-                this.el.value = config.spread.viewData[config.rowIndex][config.colIndex];
+                this.el.value = config.spread.viewData[rowIndex][colIndex];
                 setTimeout(() => this.el.focus(), 1);
                 this.isEdit = true;
             }
@@ -200,47 +259,85 @@ function TextBox(config, pNode) {
                 let _pnode = this.el.parentNode;
                 _pnode.removeChild(this.el);
                 _pnode.appendChild(this.render(_pnode));
-                this.el.innerHTML = config.spread.viewData[config.rowIndex][config.colIndex];
+                this.el.innerHTML = config.spread.viewData[rowIndex][colIndex];
                 this.el.focus();
                 this.isEdit = false;
             }
             //选中单元格
-            let td = config.spread.selected.find(([x, y]) => x === config.rowIndex && y === config.colIndex);
+            let td = config.spread.selected.find(([x, y]) => x === rowIndex && y === colIndex);
             if(td) {
                 this.el.parentNode.classList.add('selected');
             } else {
                 this.el.parentNode.classList.remove('selected');
             }
         }
-        
-        //设置当前范围
-        if (config.rowIndex == config.spread.selectedArea.minx && 
-            config.colIndex >= config.spread.selectedArea.miny && 
-            config.colIndex <= config.spread.selectedArea.maxy) {
-            this.el.parentNode.classList.add('selected-area-top');
-        } else this.el.parentNode.classList.remove('selected-area-top');
-        if (config.rowIndex == config.spread.selectedArea.maxx && 
-            config.colIndex >= config.spread.selectedArea.miny && 
-            config.colIndex <= config.spread.selectedArea.maxy) {
-            this.el.parentNode.classList.add('selected-area-bottom');
-        } else this.el.parentNode.classList.remove('selected-area-bottom');
-        
-        if (config.colIndex == config.spread.selectedArea.miny && 
-            config.rowIndex >= config.spread.selectedArea.minx && 
-            config.rowIndex <= config.spread.selectedArea.maxx) {
-            this.el.parentNode.classList.add('selected-area-left');
-        } else this.el.parentNode.classList.remove('selected-area-left');
-        if (config.colIndex == config.spread.selectedArea.maxy && 
-            config.rowIndex >= config.spread.selectedArea.minx && 
-            config.rowIndex <= config.spread.selectedArea.maxx) {
-            this.el.parentNode.classList.add('selected-area-right');
-        } else this.el.parentNode.classList.remove('selected-area-right');
+
+        if (config.spread.selectedArea.type === 'cell') {
+
+            if (rowIndex == config.spread.selectedArea.x && 
+                colIndex == config.spread.selectedArea.y) {
+                this.el.parentNode.classList.add('selected-area-init');
+            } else this.el.parentNode.classList.remove('selected-area-init');
+            
+            //设置当前范围
+            if (rowIndex == config.spread.selectedArea.minx && 
+                colIndex >= config.spread.selectedArea.miny && 
+                colIndex <= config.spread.selectedArea.maxy) {
+                this.el.parentNode.classList.add('selected-area-top');
+            } else this.el.parentNode.classList.remove('selected-area-top');
+            if (rowIndex == config.spread.selectedArea.maxx && 
+                colIndex >= config.spread.selectedArea.miny && 
+                colIndex <= config.spread.selectedArea.maxy) {
+                this.el.parentNode.classList.add('selected-area-bottom');
+            } else this.el.parentNode.classList.remove('selected-area-bottom');
+            
+            if (colIndex == config.spread.selectedArea.miny && 
+                rowIndex >= config.spread.selectedArea.minx && 
+                rowIndex <= config.spread.selectedArea.maxx) {
+                this.el.parentNode.classList.add('selected-area-left');
+            } else this.el.parentNode.classList.remove('selected-area-left');
+            if (colIndex == config.spread.selectedArea.maxy && 
+                rowIndex >= config.spread.selectedArea.minx && 
+                rowIndex <= config.spread.selectedArea.maxx) {
+                this.el.parentNode.classList.add('selected-area-right');
+            } else this.el.parentNode.classList.remove('selected-area-right');
+
+        } else if (config.spread.selectedArea.type === 'row') {
+
+            if (rowIndex == config.spread.selectedArea.x && 
+                colIndex == 0) {
+                this.el.parentNode.classList.add('selected-area-init');
+            } else this.el.parentNode.classList.remove('selected-area-init');
+            
+            //设置当前范围
+            if (rowIndex == config.spread.selectedArea.minx - 1) {
+                this.el.parentNode.classList.add('selected-area-top');
+            } else this.el.parentNode.classList.remove('selected-area-top');
+            if (rowIndex == config.spread.selectedArea.maxx - 1) {
+                this.el.parentNode.classList.add('selected-area-bottom');
+            } else this.el.parentNode.classList.remove('selected-area-bottom');
+
+        } else if (config.spread.selectedArea.type === 'col') {
+
+            if (rowIndex == 0 && 
+                colIndex == config.spread.selectedArea.y) {
+                this.el.parentNode.classList.add('selected-area-init');
+            } else this.el.parentNode.classList.remove('selected-area-init');
+            
+            //设置当前范围
+            if (colIndex == config.spread.selectedArea.miny - 1) {
+                this.el.parentNode.classList.add('selected-area-left');
+            } else this.el.parentNode.classList.remove('selected-area-left');
+            if (colIndex == config.spread.selectedArea.maxy - 1) {
+                this.el.parentNode.classList.add('selected-area-right');
+            } else this.el.parentNode.classList.remove('selected-area-right');
+        }
     }
 
     this.render = function(parentNode) {
         let el = null;
 
-        if(config.spread.active[0] === config.rowIndex && config.spread.active[1] === config.colIndex) {
+        if(config.spread.active[0] === config.rowIndex + config.spread.viewX && config.spread.active[1] === config.colIndex) {
             el = document.createElement("textarea");
             el.type = "text";
             el.classList.add("data-txt-input");
@@ -254,13 +351,13 @@ function TextBox(config, pNode) {
         el.classList.add("data-txt");
         el.freeze = config.freeze;
         el.style.width = config.spread.getColWidth(config.colIndex) + 'px';
-        el.style.height = config.spread.getRowHeight(config.rowIndex) + 'px';
+        el.style.height = config.spread.getRowHeight(config.rowIndex + config.spread.viewX) + 'px';
         el.data = config;
         // el.onfocus = this.onFocus.bind(this);
         // el.onblur = this.onBlur.bind(this);
         // el.oninput = this.onInput;
         el.onkeydown = this.onKeyPress;
-        config.spread.viewText[config.rowIndex][config.colIndex] = this;
+        config.spread.viewText[config.rowIndex + config.spread.viewX][config.colIndex] = this;
 
         if(parentNode) {
             parentNode.appendChild(el);
@@ -439,7 +536,7 @@ function Spread(config, pNode) {
     /**
      * 行数
      */
-    this.rowNum = 38;
+    this.rowNum = 40;
     /**
      * 列数
      */
@@ -468,12 +565,21 @@ function Spread(config, pNode) {
         y: 0,
         x2: 0,
         y2: 0,
-        minx: 0,
-        miny: 0,
-        maxx: 0,
-        maxy: 0,
+        get minx() {
+            return Math.min(this.x, this.x2)
+        },
+        get miny() {
+            return Math.min(this.y, this.y2)
+        },
+        get maxx() {
+            return Math.max(this.x, this.x2)
+        },
+        get maxy() {
+            return Math.max(this.y, this.y2)
+        },
         isStart: false,
-        isActive: false
+        isActive: false,
+        type: 'cell'
     };
     /**
      * 当前活动单元格
@@ -543,15 +649,12 @@ function Spread(config, pNode) {
 
     //设置当前焦点单元格
     this.setFocus = function(x, y) {
+        this.active = [];
         this.selected = [[x, y]];
         this.selectedArea.x = x;
         this.selectedArea.y = y;
         this.selectedArea.x2 = x;
         this.selectedArea.y2 = y;
-        this.selectedArea.minx = x;
-        this.selectedArea.miny = y;
-        this.selectedArea.maxx = x;
-        this.selectedArea.maxy = y;
         //spread.viewText[x][y].el.click();
 
         this.refreshSelected();
@@ -633,10 +736,10 @@ function Spread(config, pNode) {
         let leftHeader = new HeaderList({
             ...config,
             spread: this,
-            type: 'left',
+            headertype: 'left',
             count: this.rowNum,
             onInit() {
-                this.classList.add('header-list-left');
+                //this.classList.add('header-list-left');
             }
         }, headerbodyleft);
         this.header.left = leftHeader;
@@ -648,10 +751,10 @@ function Spread(config, pNode) {
         let topHeader = new HeaderList({
             ...config,
             spread: this,
-            type: 'top',
+            headertype: 'top',
             count: this.colNum,
             onInit() {
-                this.classList.add('header-list-top');
+                //this.classList.add('header-list-top');
             }
         }, headerbodytop);
         this.header.top = topHeader;
@@ -864,24 +967,46 @@ function Spread(config, pNode) {
         })
         //鼠标拖拽框选
         el.addEventListener('mousedown', e => {
+            if(!e.target || !e.target.data) {
+                return;
+            }
             this.selectedArea.isStart = true;
-            this.selectedArea.x = e.target.data.rowIndex;
-            this.selectedArea.y = e.target.data.colIndex;
-            this.selectedArea.x2 = e.target.data.rowIndex;
-            this.selectedArea.y2 = e.target.data.colIndex;
-            this.selectedArea.minx = e.target.data.rowIndex,
-            this.selectedArea.miny = e.target.data.colIndex,
-            this.selectedArea.maxx = e.target.data.rowIndex,
-            this.selectedArea.maxy = e.target.data.colIndex;
-            
-            let tdIndex = this.selected.findIndex(([x, y]) => x === e.target.data.rowIndex && y === e.target.data.colIndex);
-            if(tdIndex >= 0) {
-                this.selected = [[e.target.data.rowIndex, e.target.data.colIndex]];
-                this.active = [e.target.data.rowIndex, e.target.data.colIndex];
-                this.selectedArea.isStart = false;
+            if(e.target.data.headertype) {
+                if(e.target.data.headertype === 'left') {
+                    this.selectedArea.type = 'row';
+                    this.selectedArea.x = e.target.data.index;
+                    this.selectedArea.x2 = e.target.data.index;
+                    this.selected = Array(this.viewData[0].length).fill(null).map((i, index) => ([index, e.target.data.index]));
+                } else if(e.target.data.headertype === 'top') {
+                    this.selectedArea.type = 'col';
+                    this.selectedArea.y = e.target.data.index;
+                    this.selectedArea.y2 = e.target.data.index;
+                    this.selected = Array(this.viewData.length).fill(null).map((i, index) => ([e.target.data.index, index]));
+                }
             } else {
-                this.selected = [[e.target.data.rowIndex, e.target.data.colIndex]];
-                this.active = [];
+                this.selectedArea.type = 'cell';
+                let colIndex = e.target.data.colIndex,
+                    rowIndex = e.target.data.rowIndex;
+                if(e.target.data.rowIndex >= this.freezeArea.top) {
+                    rowIndex += this.viewX;
+                }
+                if(e.target.data.colIndex >= this.freezeArea.left) {
+                    colIndex += this.viewY;
+                }
+                this.selectedArea.x = rowIndex;
+                this.selectedArea.y = colIndex;
+                this.selectedArea.x2 = rowIndex;
+                this.selectedArea.y2 = colIndex;
+                
+                let tdIndex = this.selected.findIndex(([x, y]) => x === rowIndex && y === colIndex);
+                if(tdIndex >= 0 && this.selected.length === 1) {
+                    this.selected = [[rowIndex, colIndex]];
+                    this.active = [rowIndex, colIndex];
+                    this.selectedArea.isStart = false;
+                } else {
+                    this.selected = [[rowIndex, e.target.data.colIndex]];
+                    this.active = [];
+                }
             }
             this.refreshSelected();
             this.header.top.refresh();
@@ -889,19 +1014,40 @@ function Spread(config, pNode) {
         });
         el.addEventListener('mousemove', e => {
             if(this.selectedArea.isStart === true) {
-                this.selectedArea.x2 = e.target.data.rowIndex;
-                this.selectedArea.y2 = e.target.data.colIndex;
+                if(!e.target || !e.target.data) {
+                    return;
+                }
+                if(e.target.data.headertype) {
+                    if(e.target.data.headertype === 'left') {
+                        this.selectedArea.x2 = e.target.data.index;
+                        // this.selected = Array(this.viewData.length).fill(null).map((i, index) => ([index, e.target.data.index]));
+                    } else if(e.target.data.headertype === 'top') {
+                        this.selectedArea.y2 = e.target.data.index;
+                        // this.selected = Array(this.viewData[0].length).fill(null).map((i, index) => ([e.target.data.index, index]));
+                    }
+                } else {
+                    let colIndex = e.target.data.colIndex,
+                        rowIndex = e.target.data.rowIndex;
+                    if(e.target.data.rowIndex >= this.freezeArea.top) {
+                        rowIndex += this.viewX;
+                    }
+                    if(e.target.data.colIndex >= this.freezeArea.left) {
+                        colIndex += this.viewY;
+                    }
 
-                this.selectedArea.minx = Math.min(this.selectedArea.x, this.selectedArea.x2),
-                this.selectedArea.miny = Math.min(this.selectedArea.y, this.selectedArea.y2),
-                this.selectedArea.maxx = Math.max(this.selectedArea.x, this.selectedArea.x2),
-                this.selectedArea.maxy = Math.max(this.selectedArea.y, this.selectedArea.y2);
-                this.selected = [];
-                for (let x = this.selectedArea.minx; x <= this.selectedArea.maxx; x++) {
-                    for (let y = this.selectedArea.miny; y <= this.selectedArea.maxy; y++) {
-                        this.selected.push([x, y]);
+                    if(e.target.data && e.target.data.rowIndex != undefined) {
+                        this.selectedArea.x2 = rowIndex;
+                        this.selectedArea.y2 = colIndex;
+                        this.selected = [];
+                        for (let x = this.selectedArea.minx; x <= this.selectedArea.maxx; x++) {
+                            for (let y = this.selectedArea.miny; y <= this.selectedArea.maxy; y++) {
+                                this.selected.push([x, y]);
+                            }
+                        }
+                    } else {
                     }
                 }
+                    
                 this.refreshSelected();
                 this.header.top.refresh();
                 this.header.left.refresh();
@@ -941,6 +1087,9 @@ function Spread(config, pNode) {
                     }
                 }
             }
+            this.refreshSelected();
+            this.header.top.refresh();
+            this.header.left.refresh();
         });
 
         return el;
