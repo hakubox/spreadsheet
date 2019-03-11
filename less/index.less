@@ -43,9 +43,17 @@ body {
                 list-style: none;
                 color: #666;
                 font-size: 12px;
-                width: 50px;
+                width: 48px;
                 line-height: 25px;
+                padding-top: 0px;
+                padding-bottom: 1px;
                 border-bottom: 1px solid #DDD;
+                border-right: 2px solid #EEE;
+
+                &.active {
+                    border-right: 2px solid #448AFF;
+                    background-color: #b7d2ff;
+                }
 
                 &:first-child {
                     border-top: 1px solid #DDD;
@@ -78,7 +86,17 @@ body {
                 font-size: 12px;
                 width: 100px;
                 line-height: 20px;
+                height: 18px;
+                padding-left: 0px;
+                padding-right: 1px;
                 border-right: 1px solid #DDD;
+                border-bottom: 2px solid #EEE;
+                vertical-align: top;
+
+                &.active {
+                    border-bottom: 2px solid #448AFF;
+                    background-color: #b7d2ff;
+                }
 
                 &:first-child {
                     border-left: 1px solid #DDD;
@@ -213,6 +231,8 @@ body {
                 border-left: 1px solid @color-table-border;
                 background-color: white;
                 user-select: none;
+                padding-right: 1px;
+                padding-bottom: 1px;
 
                 &.cell-freeze-left {
                     border-left: 1px solid #888;
@@ -222,9 +242,46 @@ body {
                 }
 
                 &.selected {
-                    background-color: #DDD;
+                    background-color: #F1F1F1;
                     box-shadow: 0px 0px 0px 2px white inset;
                     color: #333;
+                }
+
+                //选框：左
+                &.selected-area-left {
+                    border-left: 1px solid #2196F3;
+                    padding-left: 0px;
+
+                    &.selected-area-top {
+                        border-top-left-radius: 4px;
+                    }
+
+                    &.selected-area-bottom {
+                        border-bottom-left-radius: 4px;
+                    }
+                }
+                //选框：右
+                &.selected-area-right {
+                    border-right: 1px solid #2196F3;
+                    padding-right: 0px;
+
+                    &.selected-area-top {
+                        border-top-right-radius: 4px;
+                    }
+
+                    &.selected-area-bottom {
+                        border-bottom-right-radius: 4px;
+                    }
+                }
+                //选框：上
+                &.selected-area-top {
+                    border-top: 1px solid #2196F3;
+                    padding-top: 0px;
+                }
+                //选框：下
+                &.selected-area-bottom {
+                    border-bottom: 1px solid #2196F3;
+                    padding-bottom: 0px;
                 }
 
                 // &:focus-within,
@@ -262,7 +319,7 @@ body {
                     cursor: cell;
                     background-color: transparent;
                     display: inline-block;
-                    padding: 2px 4px;
+                    padding: 1px 2px;
                     margin: 0px;
                     box-sizing: border-box;
                     border: none;

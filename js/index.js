@@ -30,6 +30,16 @@ function HeaderCell(config, pNode) {
         (this.el || this).innerHTML = config.type === 'top' ? numToString(index) : index;
     }
 
+    //更新状态
+    this.refresh = function() {
+        let headIndex = config.spread.selected.findIndex(([x, y]) => config.type === 'left' ? x === config.index - 1 : y === config.index - 1);
+        if(headIndex >= 0) {
+            this.el.classList.add('active');
+        } else {
+            this.el.classList.remove('active');
+        }
+    }
+
     if(pNode) {
         this.el = this.render(pNode);
         if(config.onInit) {
@@ -57,6 +67,12 @@ function HeaderList(config, pNode) {
                     i.setIndex(startIndex + index + 1);
                 }
             }
+        });
+    }
+
+    this.refresh = function() {
+        this.data.forEach((i, index) => {
+            i.refresh();
         });
     }
 
@@ -147,16 +163,18 @@ function TextBox(config, pNode) {
     /**
      * 鼠标按下选中单元格
      */
-    this.onMouseDown = function(e) {
-        let tdIndex = config.spread.selected.findIndex(([x, y]) => x === config.rowIndex && y === config.colIndex);
-        if(tdIndex >= 0) {
-            config.spread.active = [config.rowIndex, config.colIndex];
-        } else {
-            config.spread.selected = [[config.rowIndex, config.colIndex]];
-            config.spread.active = [];
-        }
-        config.spread.refreshSelected();
-    }
+    // this.onMouseDown = function(e) {
+    //     let tdIndex = config.spread.selected.findIndex(([x, y]) => x === config.rowIndex && y === config.colIndex);
+    //     if(tdIndex >= 0) {
+    //         config.spread.active = [config.rowIndex, config.colIndex];
+    //     } else {
+    //         config.spread.selected = [[config.rowIndex, config.colIndex]];
+    //         config.spread.active = [];
+    //     }
+    //     config.spread.refreshSelected();
+    //     config.spread.header.top.refresh();
+    //     config.spread.header.left.refresh();
+    // }
 
     /**
      * 鼠标松开单元格
@@ -194,6 +212,29 @@ function TextBox(config, pNode) {
                 this.el.parentNode.classList.remove('selected');
             }
         }
+        
+        //设置当前范围
+        if (config.rowIndex == config.spread.selectedArea.minx && 
+            config.colIndex >= config.spread.selectedArea.miny && 
+            config.colIndex <= config.spread.selectedArea.maxy) {
+            this.el.parentNode.classList.add('selected-area-top');
+        } else this.el.parentNode.classList.remove('selected-area-top');
+        if (config.rowIndex == config.spread.selectedArea.maxx && 
+            config.colIndex >= config.spread.selectedArea.miny && 
+            config.colIndex <= config.spread.selectedArea.maxy) {
+            this.el.parentNode.classList.add('selected-area-bottom');
+        } else this.el.parentNode.classList.remove('selected-area-bottom');
+        
+        if (config.colIndex == config.spread.selectedArea.miny && 
+            config.rowIndex >= config.spread.selectedArea.minx && 
+            config.rowIndex <= config.spread.selectedArea.maxx) {
+            this.el.parentNode.classList.add('selected-area-left');
+        } else this.el.parentNode.classList.remove('selected-area-left');
+        if (config.colIndex == config.spread.selectedArea.maxy && 
+            config.rowIndex >= config.spread.selectedArea.minx && 
+            config.rowIndex <= config.spread.selectedArea.maxx) {
+            this.el.parentNode.classList.add('selected-area-right');
+        } else this.el.parentNode.classList.remove('selected-area-right');
     }
 
     this.render = function(parentNode) {
@@ -205,7 +246,7 @@ function TextBox(config, pNode) {
             el.classList.add("data-txt-input");
         } else {
             el = document.createElement("span");
-            el.onmousedown = this.onMouseDown.bind(this);
+            // el.onmousedown = this.onMouseDown.bind(this);
             el.onmouseup = this.onMouseUp.bind(this);
             // el.setAttribute('tabindex', '-1');
         }
@@ -420,6 +461,21 @@ function Spread(config, pNode) {
      */
     this.selected = [];
     /**
+     * 已框选区域
+     */
+    this.selectedArea = {
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 0,
+        minx: 0,
+        miny: 0,
+        maxx: 0,
+        maxy: 0,
+        isStart: false,
+        isActive: false
+    };
+    /**
      * 当前活动单元格
      */
     this.active = [];
@@ -455,9 +511,7 @@ function Spread(config, pNode) {
     //设置值
     this.setData = function(x, y, value) {
         this.viewData[x][y] = value;
-        // this.viewText[x][y].forEach(i => {
-        //     i.value = value;
-        // });
+        this.viewText[x][y].el.value = value;
     }
 
     /**
@@ -489,7 +543,20 @@ function Spread(config, pNode) {
 
     //设置当前焦点单元格
     this.setFocus = function(x, y) {
-        spread.viewText[x][y].el.click();
+        this.selected = [[x, y]];
+        this.selectedArea.x = x;
+        this.selectedArea.y = y;
+        this.selectedArea.x2 = x;
+        this.selectedArea.y2 = y;
+        this.selectedArea.minx = x;
+        this.selectedArea.miny = y;
+        this.selectedArea.maxx = x;
+        this.selectedArea.maxy = y;
+        //spread.viewText[x][y].el.click();
+
+        this.refreshSelected();
+        this.header.top.refresh();
+        this.header.left.refresh();
     }
 
     /**
@@ -543,7 +610,7 @@ function Spread(config, pNode) {
      * 重绘选中状态
      */
     this.refreshSelected = function() {
-        this.viewText.forEach(row => row.forEach(cell => cell.refresh()))
+        this.viewText.forEach(row => row.forEach(cell => cell.refresh()));
     }
 
     //区域滚动
@@ -757,6 +824,93 @@ function Spread(config, pNode) {
                 );
             }
         });
+        document.body.addEventListener('keydown', e => {
+            if([13, 37, 38, 39, 40].includes(e.keyCode)) {
+                if(this.selected.length == 1) {
+                    let x = this.selected[0][0],
+                        y = this.selected[0][1];
+                    switch (e.keyCode) {
+                        case 38:
+                            if(x > 0) {
+                                this.setFocus(x - 1, y);
+                            }
+                            break;
+                        case 13:
+                        case 40:
+                            if(x < this.viewData.length - 1) {
+                                this.setFocus(x + 1, y);
+                            }
+                            break;
+                        case 37:
+                            if(y > 0) {
+                                this.setFocus(x, y - 1);
+                            }
+                            break;
+                        case 39:
+                            if(y < this.viewData[0].length - 1) {
+                                this.setFocus(x, y + 1);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } else if(this.selected.length > 0) {
+                this.active = this.selected[0];
+                this.refreshSelected();
+                //this.setData(this.selected[0][0], this.selected[0][1], this.viewData[this.selected[0][0]][this.selected[0][1]] + e.key);
+                // this.viewText[this.selected[0][0]][this.selected[0][1]].el.onkeypress(e);
+            }
+        })
+        //鼠标拖拽框选
+        el.addEventListener('mousedown', e => {
+            this.selectedArea.isStart = true;
+            this.selectedArea.x = e.target.data.rowIndex;
+            this.selectedArea.y = e.target.data.colIndex;
+            this.selectedArea.x2 = e.target.data.rowIndex;
+            this.selectedArea.y2 = e.target.data.colIndex;
+            this.selectedArea.minx = e.target.data.rowIndex,
+            this.selectedArea.miny = e.target.data.colIndex,
+            this.selectedArea.maxx = e.target.data.rowIndex,
+            this.selectedArea.maxy = e.target.data.colIndex;
+            
+            let tdIndex = this.selected.findIndex(([x, y]) => x === e.target.data.rowIndex && y === e.target.data.colIndex);
+            if(tdIndex >= 0) {
+                this.selected = [[e.target.data.rowIndex, e.target.data.colIndex]];
+                this.active = [e.target.data.rowIndex, e.target.data.colIndex];
+                this.selectedArea.isStart = false;
+            } else {
+                this.selected = [[e.target.data.rowIndex, e.target.data.colIndex]];
+                this.active = [];
+            }
+            this.refreshSelected();
+            this.header.top.refresh();
+            this.header.left.refresh();
+        });
+        el.addEventListener('mousemove', e => {
+            if(this.selectedArea.isStart === true) {
+                this.selectedArea.x2 = e.target.data.rowIndex;
+                this.selectedArea.y2 = e.target.data.colIndex;
+
+                this.selectedArea.minx = Math.min(this.selectedArea.x, this.selectedArea.x2),
+                this.selectedArea.miny = Math.min(this.selectedArea.y, this.selectedArea.y2),
+                this.selectedArea.maxx = Math.max(this.selectedArea.x, this.selectedArea.x2),
+                this.selectedArea.maxy = Math.max(this.selectedArea.y, this.selectedArea.y2);
+                this.selected = [];
+                for (let x = this.selectedArea.minx; x <= this.selectedArea.maxx; x++) {
+                    for (let y = this.selectedArea.miny; y <= this.selectedArea.maxy; y++) {
+                        this.selected.push([x, y]);
+                    }
+                }
+                this.refreshSelected();
+                this.header.top.refresh();
+                this.header.left.refresh();
+            }
+        });
+        el.addEventListener('mouseup', e => {
+            this.selectedArea.isStart = false;
+        });
+        //滚轮滚动
         el.addEventListener('wheel', e => {
             if(e.deltaY > 0) {
                 this.viewX += 3;
