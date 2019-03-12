@@ -129,300 +129,6 @@ function HeaderList(config, pNode) {
     }
 }
 
-function Input(config, pNode) {
-
-    if(pNode) {
-        this.el = this.render(pNode);
-        if(config.onInit) {
-            config.onInit.call(this.el);
-        }
-    }
-}
-
-function TextBox(config, pNode) {
-    this.el = null;
-    // this.call(new Input(config));
-
-    this.isEdit = false;
-
-    //按键事件
-    this.onKeyPress = function(event) {
-        config.spread.inputKeyPress(
-            config.rowIndex,
-            config.colIndex,
-            event
-        );
-    }
-
-    let _class = [];
-
-    /**
-     * 重绘合并状态
-     */
-    this.refreshMerge = function() {
-        let _pnode = this.el.parentNode;
-        let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) => 
-            x === config.rowIndex && 
-            y === config.colIndex
-        );
-        if(mergeinfo) {
-            this.el.style.width = mergeinfo[3] * 100 + 'px';
-            this.el.style.height = mergeinfo[2] * 25 + 'px';
-            _pnode.setAttribute('rowspan', mergeinfo[2]);
-            _pnode.setAttribute('colspan', mergeinfo[3]);
-        } else {
-            this.el.style.width = '100px';
-            this.el.style.height = '25px';
-            _pnode.removeAttribute('rowspan');
-            _pnode.removeAttribute('colspan');
-        }
-
-        let mergeheadinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) => 
-            x <= config.rowIndex && 
-            x + rowspan > config.rowIndex && 
-            y <= config.colIndex &&
-            y + colspan > config.colIndex && 
-            !(x === config.rowIndex && y === config.colIndex));
-        if(mergeheadinfo) {
-            //console.log(config.rowIndex, config.colIndex);
-            _pnode.classList.add('hidden');
-        }
-    }
-
-    /**
-     * 重绘选中状态
-     */
-    this.refresh = function() {
-        let colIndex = config.colIndex,
-            rowIndex = config.rowIndex,
-            _pnode = this.el.parentNode;
-        _class = [];
-        if(config.rowIndex >= config.spread.freezeArea.top) {
-            rowIndex += config.spread.viewX;
-        }
-        if(config.colIndex >= config.spread.freezeArea.left) {
-            colIndex += config.spread.viewY;
-        }
-
-        //活动单元格
-        if(config.spread.active[0] === rowIndex && config.spread.active[1] === colIndex) {
-            _class.push('focus');
-            if(this.isEdit === false) {
-                _pnode.removeChild(this.el);
-                _pnode.appendChild(this.render(_pnode));
-                this.el.value = config.spread.getData(rowIndex, colIndex);
-                setTimeout(() => this.el.focus(), 1);
-                this.isEdit = true;
-            }
-        } else {
-            if(this.isEdit === true) {
-                _pnode.removeChild(this.el);
-                _pnode.appendChild(this.render(_pnode));
-                this.el.innerHTML = config.spread.getData(rowIndex, colIndex);
-                this.el.focus();
-                this.isEdit = false;
-            }
-            //选中单元格
-            let td = config.spread.selected.find(([x, y]) => x === rowIndex && y === colIndex);
-            if(td) {
-                _class.push('selected');
-            }
-        }
-
-        if (config.spread.selectedArea.type === 'cell') {
-
-            if (rowIndex == config.spread.selectedArea.x &&
-                colIndex == config.spread.selectedArea.y) {
-                _class.push('selected-area-init');
-            }
-
-            //设置当前范围
-            if (rowIndex == config.spread.selectedArea.minx &&
-                colIndex >= config.spread.selectedArea.miny &&
-                colIndex <= config.spread.selectedArea.maxy) {
-                _class.push('selected-area-top');
-            }
-            if (rowIndex == config.spread.selectedArea.maxx &&
-                colIndex >= config.spread.selectedArea.miny &&
-                colIndex <= config.spread.selectedArea.maxy) {
-                _class.push('selected-area-bottom');
-            }
-
-            if (colIndex == config.spread.selectedArea.miny &&
-                rowIndex >= config.spread.selectedArea.minx &&
-                rowIndex <= config.spread.selectedArea.maxx) {
-                _class.push('selected-area-left');
-            }
-            if (colIndex == config.spread.selectedArea.maxy &&
-                rowIndex >= config.spread.selectedArea.minx &&
-                rowIndex <= config.spread.selectedArea.maxx) {
-                _class.push('selected-area-right');
-            }
-
-        } else if (config.spread.selectedArea.type === 'row') {
-
-            if (rowIndex == config.spread.selectedArea.x - 1 && colIndex == 0) {
-                _class.push('selected-area-init');
-            }
-
-            //设置当前范围
-            if (rowIndex == config.spread.selectedArea.minx - 1) {
-                _class.push('selected-area-top');
-            }
-            if (rowIndex == config.spread.selectedArea.maxx - 1) {
-                _class.push('selected-area-bottom');
-            }
-
-        } else if (config.spread.selectedArea.type === 'col') {
-            if (rowIndex == 0 && colIndex == config.spread.selectedArea.y - 1) {
-                _class.push('selected-area-init');
-            }
-
-            //设置当前范围
-            if (colIndex == config.spread.selectedArea.miny - 1) {
-                _class.push('selected-area-left');
-            }
-            if (colIndex == config.spread.selectedArea.maxy - 1) {
-                _class.push('selected-area-right');
-            }
-        }
-
-        let _className = _class.join(' '),
-            _oldClassName = _pnode.className;
-        if(_className !== _oldClassName && (_className != '' || _oldClassName !== '')) {
-            _pnode.className = _className;
-        }
-    }
-
-    this.render = function(parentNode) {
-        let el = null;
-
-        if(config.spread.active[0] === config.rowIndex + config.spread.viewX && config.spread.active[1] === config.colIndex) {
-            el = document.createElement("textarea");
-            el.type = "text";
-            el.classList.add("data-txt-input");
-            el.onkeydown = this.onKeyPress;
-        } else {
-            el = document.createElement("span");
-        }
-
-        el.classList.add("data-txt");
-        el.freeze = config.freeze;
-        el.style.width = config.spread.getColWidth(config.colIndex) + 'px';
-        el.style.height = config.spread.getRowHeight(config.rowIndex + config.spread.viewX) + 'px';
-        el.data = config;
-        config.spread.viewText[config.rowIndex][config.colIndex] = this;
-
-        if(parentNode) {
-            parentNode.appendChild(el);
-        }
-        this.el = el;
-        return el;
-    };
-
-    if(pNode) {
-        this.el = this.render(pNode);
-        if(config.onInit) {
-            config.onInit.call(this.el);
-        }
-    }
-}
-
-/**
- * @class 单元格
- */
-function Cell(config, pNode) {
-    this.el = null;
-
-    this.render = function(parentNode) {
-        let el = document.createElement("td");
-        el.data = config;
-        // if(config.colIndex === config.spread.freezeArea.left) {
-        //     el.classList.add('cell-freeze-left');
-        // }
-        // if(config.rowIndex === config.spread.freezeArea.top) {
-        //     el.classList.add('cell-freeze-top');
-        // }
-        // el.style.width = "100px";
-        el.appendChild(new TextBox(config).render());
-
-        if(parentNode) {
-            parentNode.appendChild(el);
-        }
-        return el;
-    };
-
-    if(pNode) {
-        this.el = this.render(pNode);
-        if(config.onInit) {
-            config.onInit.call(this.el);
-        }
-    }
-}
-
-/**
- * @class 行
- */
-function Row(config, pNode) {
-
-    this.render = function(parentNode) {
-        let el = document.createElement("tr");
-        el.data = config;
-        Array(config.colNum).fill('').map((i, colIndex) => {
-            el.appendChild(new Cell({
-                ...config,
-                colIndex: colIndex
-            }).render());
-        });
-
-        if(parentNode) {
-            parentNode.appendChild(el);
-        }
-        return el;
-    };
-
-    if(pNode) {
-        this.el = this.render(pNode);
-        if(config.onInit) {
-            config.onInit.call(this.el);
-        }
-    }
-}
-
-/**
- * @class 表格
- */
-function Table(config, pNode) {
-    this.el = null;
-
-    this.render = function(parentNode) {
-        let el = document.createElement("table");
-        el.data = config;
-        el.appendChild(document.createElement("tbody"));
-
-        Array(config.rowNum).fill('').map((i, rowIndex) => {
-            el.childNodes[0].appendChild(
-                new Row({
-                    ...config,
-                    rowIndex
-                }).render()
-            )
-        });
-
-        if(parentNode) {
-            parentNode.appendChild(el);
-        }
-        return el;
-    };
-
-    if(pNode) {
-        this.el = this.render(pNode);
-        if(config.onInit) {
-            config.onInit.call(this.el);
-        }
-    }
-}
-
 /**
  * @class 表格页
  */
@@ -554,7 +260,7 @@ function Spread(config, pNode) {
      * 单元格合并区域
      */
     this.areaMerge = [
-        [3, 3, 2, 2]
+        [3, 3, 2, 4]
     ];
     /**
      * 合并后隐藏区域（在合并区域调整后初始化
@@ -566,7 +272,8 @@ function Spread(config, pNode) {
     this.header = {
         top: null,
         left: null
-    }
+    };
+    this.table = null;
 
     //设置值
     this.setData = function(x, y, value = '') {
@@ -689,6 +396,13 @@ function Spread(config, pNode) {
     }
 
     /**
+     * 根据坐标点获取真实坐标
+     */
+    this.getCellPoint = function(x, y) {
+        
+    }
+
+    /**
      * 设置合并单元格
      */
     this.setMerge = function(x, y, rowspan, colspan) {
@@ -765,6 +479,7 @@ function Spread(config, pNode) {
                 this.classList.add('haku-table', 'haku-table-main');
             }
         }, fixedMainBody);
+        this.table = tableMain;
 
         fixedMain.appendChild(fixedMainBody);
         el.appendChild(fixedMain);
@@ -897,8 +612,7 @@ function Spread(config, pNode) {
             this.header.left.refresh();
         });
 
-        //节流参数
-        el.addEventListener('mousemove', e => {
+        document.body.addEventListener('mousemove', e => {
             if(this.selectedArea.isStart === true) {
                 if(!e.target || !e.target.data) {
                     return;
@@ -935,14 +649,60 @@ function Spread(config, pNode) {
                         this.selectedArea.x2 = rowIndex;
                         this.selectedArea.y2 = colIndex;
                         this.selected = [];
+                        
                         for (let x = this.selectedArea.minx; x <= this.selectedArea.maxx; x++) {
                             for (let y = this.selectedArea.miny; y <= this.selectedArea.maxy; y++) {
-                                this.selected.push([x, y]);
+                                //if(!spread.areaMerge.find(([x1, y1, rowspan, colspan]) => x > x1 + rowspan && y > y1 + colspan)) {
+                                    this.selected.push([x, y]);
+                                //} else {
+                                //}
                             }
                         }
                     } else {
                     }
                 }
+
+                //使用递归完善选择范围（针对合并单元格
+                let _fn = (minx, miny, maxx, maxy) => {
+                    let _minx = minx, _miny = miny, _maxx = maxx, _maxy = maxy;
+                    for (let x = minx; x <= maxx; x++) {
+                        for (let y = miny; y <= maxy; y++) {
+                            let mergecell = spread.areaMerge.find(([x1, y1, rowspan, colspan]) => 
+                                x >= x1 && 
+                                x < x1 + rowspan && 
+                                y >= y1 && 
+                                y < y1 + colspan);
+                            if(mergecell) {
+                                _minx = Math.min(_minx, mergecell[0]);
+                                _miny = Math.min(_miny, mergecell[1]);
+                                _maxx = Math.max(_maxx, mergecell[0] + mergecell[2] - 1);
+                                _maxy = Math.max(_maxy, mergecell[1] + mergecell[3] - 1);
+                            }
+                        }
+                    }
+                    if(_minx !== minx || _maxx !== maxx || _miny !== miny || _maxy !== maxy) {
+                        _fn(_minx, _miny, _maxx, _maxy);
+                    } else {
+                        if(this.selectedArea.x <= this.selectedArea.x2) {
+                            this.selectedArea.x = _minx;
+                            this.selectedArea.x2 = _maxx;
+                        } else {
+                            this.selectedArea.x = _maxx;
+                            this.selectedArea.x2 = _minx;
+                        }
+                        if(this.selectedArea.y <= this.selectedArea.y2) {
+                            this.selectedArea.y = _miny;
+                            this.selectedArea.y2 = _maxy;
+                        } else {
+                            this.selectedArea.y = _maxy;
+                            this.selectedArea.y2 = _miny;
+                        }
+                    }
+                };
+                _fn(this.selectedArea.minx,
+                    this.selectedArea.miny,
+                    this.selectedArea.maxx,
+                    this.selectedArea.maxy);
 
                 this.refreshSelected();
                 this.header.top.refresh();
@@ -988,8 +748,10 @@ function Spread(config, pNode) {
             this.header.top.refresh();
             this.header.left.refresh();
         });
-
+        
+        this.refreshSelected();
         this.refreshMerge();
+        this.table.refresh();
         return el;
     };
 
