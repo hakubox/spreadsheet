@@ -290,13 +290,16 @@ body {
                 padding-right: 1px;
                 padding-bottom: 1px;
                 cursor: cell;
-                transform: translateZ(0);
 
                 &.cell-freeze-left {
                     border-left: 1px solid #888;
                 }
                 &.cell-freeze-top {
                     border-top: 1px solid #888;
+                }
+
+                &.hidden {
+                    display: none;
                 }
 
                 &.selected {
@@ -437,6 +440,62 @@ body {
                 > td {
                     border-bottom: 1px solid @color-table-border;
                 }
+            }
+        }
+    }
+}
+
+//右键菜单
+.context-menu {
+    position: fixed;
+    display: none;
+    margin: 0px;
+    padding: 1px 0px 3px 0px;
+    background-color: white;
+    border: 1px solid #BBB;
+    border-radius: 4px;
+    border-top-left-radius: 0px;
+    min-width: 150px;
+    box-shadow: 2px 2px 3px 1px rgba(0,0,0,0.1);
+    z-index: 3;
+
+    &.context-menu-show {
+        display: inline-block;
+    }
+
+    > li {
+        position: relative;
+        cursor: pointer;
+        display: block;
+        padding: 0px 3px 0px 10px;
+        box-sizing: border-box;
+        width: 100%;
+        color: #666;
+        font-size: 12px;
+        line-height: 22px;
+        white-space: nowrap;
+
+        &.hidden {
+            display: none;
+        }
+
+        > span {
+            display: inline-block;
+        }
+
+        > key {
+            float: right;
+            color: #CCC;
+            font-size: 12px;
+            transform: scale(.9);
+            margin-left: 10px;
+        }
+
+        &:hover {
+            background-color: #EEE;
+
+            > key {
+                color: #2196F3;
             }
         }
     }

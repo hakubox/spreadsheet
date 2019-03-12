@@ -131,7 +131,6 @@ function HeaderList(config, pNode) {
 
 function Input(config, pNode) {
 
-
     if(pNode) {
         this.el = this.render(pNode);
         if(config.onInit) {
@@ -157,6 +156,42 @@ function TextBox(config, pNode) {
 
     let _class = [];
 
+    /**
+     * 重绘合并状态
+     */
+    this.refreshMerge = function() {
+        let _pnode = this.el.parentNode;
+        let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) => 
+            x === config.rowIndex && 
+            y === config.colIndex
+        );
+        if(mergeinfo) {
+            this.el.style.width = mergeinfo[3] * 100 + 'px';
+            this.el.style.height = mergeinfo[2] * 25 + 'px';
+            _pnode.setAttribute('rowspan', mergeinfo[2]);
+            _pnode.setAttribute('colspan', mergeinfo[3]);
+        } else {
+            this.el.style.width = '100px';
+            this.el.style.height = '25px';
+            _pnode.removeAttribute('rowspan');
+            _pnode.removeAttribute('colspan');
+        }
+
+        let mergeheadinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) => 
+            x <= config.rowIndex && 
+            x + rowspan > config.rowIndex && 
+            y <= config.colIndex &&
+            y + colspan > config.colIndex && 
+            !(x === config.rowIndex && y === config.colIndex));
+        if(mergeheadinfo) {
+            //console.log(config.rowIndex, config.colIndex);
+            _pnode.classList.add('hidden');
+        }
+    }
+
+    /**
+     * 重绘选中状态
+     */
     this.refresh = function() {
         let colIndex = config.colIndex,
             rowIndex = config.rowIndex,
@@ -422,23 +457,23 @@ function Spread(config, pNode) {
     let _viewY = 0;
     Object.defineProperties(this, {
         viewX: {
+            get() {
+                return _viewX;
+            },
             set(value) {
                 if(value < 0) value = 0;
                 this.header.left.setStartIndex(value);
                 _viewX = value;
-            },
-            get() {
-                return _viewX;
             }
         },
         viewY: {
+            get() {
+                return _viewY;
+            },
             set(value) {
                 if(value < 0) value = 0;
                 this.header.top.setStartIndex(value);
                 _viewY = value;
-            },
-            get() {
-                return _viewY;
             }
         }
     })
@@ -457,7 +492,7 @@ function Spread(config, pNode) {
     /**
      * 当前显示数据
      */
-    this.viewData = [];
+    this.viewData = [[]];
     /**
      * 当前显示文本框
      */
@@ -515,6 +550,16 @@ function Spread(config, pNode) {
         right: 1,
         bottom: 0
     };
+    /**
+     * 单元格合并区域
+     */
+    this.areaMerge = [
+        [3, 3, 2, 2]
+    ];
+    /**
+     * 合并后隐藏区域（在合并区域调整后初始化
+     */
+    this.areaMergeHideCell = [];
     /**
      * 顶部与左侧头部区域
      */
@@ -634,6 +679,36 @@ function Spread(config, pNode) {
      */
     this.refreshSelected = function() {
         this.viewText.forEach(row => row.forEach(cell => cell.refresh()));
+    }
+
+    /**
+     * 重绘合并状态
+     */
+    this.refreshMerge = function() {
+        this.viewText.forEach(row => row.forEach(cell => cell.refreshMerge()));
+    }
+
+    /**
+     * 设置合并单元格
+     */
+    this.setMerge = function(x, y, rowspan, colspan) {
+        let mergeIndex = this.areaMerge.findIndex(([x1, y1, rowspan, colspan]) => x1 === x && y1 === y);
+        if(mergeIndex >= 0) {
+            if(rowspan > 1 || colspan > 1) {
+                this.areaMerge[mergeIndex][2] = rowspan;
+                this.areaMerge[mergeIndex][3] = colspan;
+            } else {
+                this.areaMerge.splice(mergeIndex, 1);
+            }
+        } else {
+            this.areaMerge.push([x, y, rowspan, colspan]);
+        }
+        this.refreshMerge();
+        this.selectedArea.x = x;
+        this.selectedArea.x2 = x;
+        this.selectedArea.y = y;
+        this.selectedArea.y2 = y;
+        this.refreshSelected();
     }
 
     this.render = function(parentNode) {
@@ -764,26 +839,37 @@ function Spread(config, pNode) {
         })
         //鼠标拖拽框选
         el.addEventListener('mousedown', e => {
-            if(!e.target || !e.target.data || e.buttons !== 1) {
+            if(!e.target || !e.target.data) {
                 return;
             }
-            this.selectedArea.isStart = true;
             if(e.target.data.headertype) {
                 if(e.target.data.headertype === 'left') {
+                    //行状态下判断取消
+                    if(e.buttons !== 1 && (e.target.data.index > this.selectedArea.maxx || e.target.data.index < this.selectedArea.minx)) {
+                        return;
+                    }
                     this.selectedArea.type = 'row';
                     this.selectedArea.x = e.target.data.index;
                     this.selectedArea.x2 = e.target.data.index;
-                    this.selected = Array(this.viewData[0].length).fill(null).map((i, index) => ([e.target.data.index - 1, index]));
+                    this.selected = Array(this.viewText[0].length).fill(null).map((i, index) => ([e.target.data.index - 1, index]));
                 } else if(e.target.data.headertype === 'top') {
+                    //列状态下判断取消
+                    if(e.buttons !== 1 && (e.target.data.index > this.selectedArea.maxy || e.target.data.index < this.selectedArea.miny)) {
+                        return;
+                    }
                     this.selectedArea.type = 'col';
                     this.selectedArea.y = e.target.data.index;
                     this.selectedArea.y2 = e.target.data.index;
-                    this.selected = Array(this.viewData.length).fill(null).map((i, index) => ([index, e.target.data.index - 1]));
+                    this.selected = Array(this.viewText.length).fill(null).map((i, index) => ([index, e.target.data.index - 1]));
                 }
             } else {
-                this.selectedArea.type = 'cell';
                 let colIndex = e.target.data.colIndex,
                     rowIndex = e.target.data.rowIndex;
+                //单元格状态下判断取消
+                if(e.buttons !== 1 && this.selected.filter(([x, y]) => x === rowIndex && y === colIndex).length > 0) {
+                    return;
+                }
+                this.selectedArea.type = 'cell';
                 if(e.target.data.rowIndex >= this.freezeArea.top) {
                     rowIndex += this.viewX;
                 }
@@ -805,6 +891,7 @@ function Spread(config, pNode) {
                     this.active = [];
                 }
             }
+            this.selectedArea.isStart = true;
             this.refreshSelected();
             this.header.top.refresh();
             this.header.left.refresh();
@@ -825,12 +912,12 @@ function Spread(config, pNode) {
                 if(e.target.data.headertype) {
                     if(e.target.data.headertype === 'left') {
                         this.selectedArea.x2 = e.target.data.index;
-                        this.selected = [].concat.apply([], Array(this.viewData[0].length).fill(null).map((i, index) => {
+                        this.selected = [].concat.apply([], Array(this.viewText[0].length).fill(null).map((i, index) => {
                             return (Array(this.selectedArea.maxx - this.selectedArea.minx + 1).fill(null).map((o, oIndex) => ([oIndex + this.selectedArea.minx - 1, index])))
                         }))
                     } else if(e.target.data.headertype === 'top') {
                         this.selectedArea.y2 = e.target.data.index;
-                        this.selected = [].concat.apply([], Array(this.viewData.length).fill(null).map((i, index) => {
+                        this.selected = [].concat.apply([], Array(this.viewText.length).fill(null).map((i, index) => {
                             return (Array(this.selectedArea.maxy - this.selectedArea.miny + 1).fill(null).map((o, oIndex) => ([index, oIndex + this.selectedArea.miny - 1])))
                         }))
                     }
@@ -862,7 +949,7 @@ function Spread(config, pNode) {
                 this.header.left.refresh();
             }
         });
-        el.addEventListener('mouseup', e => {
+        document.body.addEventListener('mouseup', e => {
             this.selectedArea.isStart = false;
         });
         //滚轮滚动
@@ -897,10 +984,12 @@ function Spread(config, pNode) {
                 }
             }
             this.refreshSelected();
+            this.refreshMerge();
             this.header.top.refresh();
             this.header.left.refresh();
         });
 
+        this.refreshMerge();
         return el;
     };
 
@@ -926,10 +1015,64 @@ console.time('页面加载');
 let spread = new Spread();
 spreadEl = spread.render(document.body);
 
+let menu = new ContextMenu({
+    menus: [
+        {
+            text: '复制',
+            key: 'ctrl+c',
+            onInit(e) {
+
+            },
+            onClick(e) {
+
+            }
+        }, {
+            text: '合并单元格',
+            key: 'ctrl+m',
+            onInit(e) {
+                return {
+                    hidden: spread.selected.length <= 1 || spread.selectedArea.type !== 'cell'
+                }
+            },
+            onClick(e) { 
+                console.log('当前合并的单元格', 
+                    spread.selectedArea.minx,
+                    spread.selectedArea.miny,
+                    spread.selectedArea.maxx - spread.selectedArea.minx + 1,
+                    spread.selectedArea.maxy - spread.selectedArea.miny + 1
+                );
+                spread.setMerge(
+                    spread.selectedArea.minx,
+                    spread.selectedArea.miny,
+                    spread.selectedArea.maxx - spread.selectedArea.minx + 1,
+                    spread.selectedArea.maxy - spread.selectedArea.miny + 1
+                );
+            }
+        }, {
+            text: '拆分单元格',
+            key: 'ctrl+m',
+            onInit(e) {
+                return {
+                    hidden: true
+                }
+            },
+            onClick(e) { 
+                if(e && e.data) {
+                    console.log(e);
+                }
+            }
+        }
+    ]
+}, spreadEl);
+
 window.spread = spread;
 spreadEl.classList.add('init');
 setTimeout(() => {
     spreadEl.classList.add('animeinit');
 }, 200);
+
+document.oncontextmenu = function(ev) {
+    return false;    //屏蔽右键菜单
+}
 
 console.timeEnd('页面加载');
