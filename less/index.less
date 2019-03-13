@@ -41,6 +41,7 @@ body {
 
             > li {
                 user-select: none;
+                -moz-user-select: none;
                 position: relative;
                 list-style: none;
                 color: #666;
@@ -107,6 +108,7 @@ body {
 
             > li {
                 user-select: none;
+                -moz-user-select: none;
                 position: relative;
                 display: inline-block;
                 text-align: center;
@@ -287,10 +289,11 @@ body {
                 padding: 0px;
                 border-top: 1px solid @color-table-border;
                 border-left: 1px solid @color-table-border;
+                border-bottom: 1px solid transparent;
+                border-right: 1px solid transparent;
                 background-color: white;
                 user-select: none;
-                padding-right: 1px;
-                padding-bottom: 1px;
+                -moz-user-select: none;
                 cursor: cell;
 
                 &.cell-freeze-left {
@@ -309,10 +312,24 @@ body {
                     color: #333;
                 }
 
+                &:after {
+                    position: absolute;
+                    content: '';
+                    opacity: 0;
+                    bottom: -5px;
+                    right: -5px;
+                    width: 6px;
+                    height: 6px;
+                    z-index: 1;
+                    border-radius: 1px;
+                    background-color: #67b0ec;
+                    border: 1px solid white;
+                }
+
                 //选框：左
                 &.selected-area-left {
-                    border-left: 1px solid #2196F3;
-                    padding-left: 0px;
+                    border-left-color: #2196F3;
+                    // padding-left: 0px;
                     box-shadow: 2px 0px 0 0px white inset;
 
                     &.selected-area-right {
@@ -335,8 +352,8 @@ body {
                 }
                 //选框：右
                 &.selected-area-right {
-                    border-right: 1px solid #2196F3;
-                    padding-right: 0px;
+                    border-right-color: #2196F3;
+                    // padding-right: 0px;
                     box-shadow: -2px 0px 0 0px white inset;
 
                     &.selected-area-top {
@@ -349,29 +366,20 @@ body {
                         box-shadow: -1px -1px 0px 1px white inset;
 
                         &:after {
-                            position: absolute;
-                            content: '';
-                            bottom: -5px;
-                            right: -5px;
-                            width: 6px;
-                            height: 6px;
-                            z-index: 1;
-                            border-radius: 1px;
-                            background-color: #67b0ec;
-                            border: 1px solid white;
+                            opacity: 1;
                         }
                     }
                 }
                 //选框：上
                 &.selected-area-top {
-                    border-top: 1px solid #2196F3;
-                    padding-top: 0px;
+                    border-top-color: #2196F3;
+                    // padding-top: 0px;
                     box-shadow: 0px 2px 0 0px white inset;
                 }
                 //选框：下
                 &.selected-area-bottom {
-                    border-bottom: 1px solid #2196F3;
-                    padding-bottom: 0px;
+                    border-bottom-color: #2196F3;
+                    // padding-bottom: 0px;
                     box-shadow: 0px -2px 0 0px white inset;
                 }
 
@@ -398,6 +406,8 @@ body {
 
                         &.data-txt-input {
                             opacity: 1.0;
+                            user-select: text;
+                            -moz-user-select: text;
                         }
 
                     }
@@ -405,6 +415,8 @@ body {
 
                 > .data-txt {
                     position: absolute;
+                    user-select: none;
+                    -moz-user-select: none;
                     left: 0px;
                     top: 0px;
                     width: 100%;
@@ -420,6 +432,7 @@ body {
                     line-height: 21px;
                     outline: none;
                     font-family: 'Microsoft YaHei';
+                    z-index: 2;
 
                     &.data-txt-input {
                         resize: none;
@@ -439,15 +452,15 @@ body {
                     border-right: 1px solid @color-table-border;
                 }
 
-                &:before {
-                    position: absolute;
-                    content: '';
-                    top: 0px;
-                    left: 0px;
-                    width: 100%;
-                    height: 100%;
-                    z-index: -1;
-                }
+                // &:before {
+                //     position: absolute;
+                //     content: '';
+                //     top: 0px;
+                //     left: 0px;
+                //     width: 100%;
+                //     height: 100%;
+                //     z-index: -1;
+                // }
 
             }
 

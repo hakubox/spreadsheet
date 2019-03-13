@@ -30,8 +30,8 @@ function TextBox(config, pNode) {
      */
     this.refreshMerge = function() {
         let _pnode = this.el.parentNode;
-        let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) => 
-            x === config.rowIndex + config.spread.viewX && 
+        let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
+            x === config.rowIndex + config.spread.viewX &&
             y === config.colIndex + config.spread.viewY
         );
 
@@ -50,18 +50,18 @@ function TextBox(config, pNode) {
                 // _pnode.setAttribute('rowspan', mergeinfo[2] + config.rowIndex - config.spread.freezeArea.top);
                 _pnode.setAttribute('rowspan', 1);
             }
-            
+
             _pnode.setAttribute('colspan', mergeinfo[3]);
         } else {
             _pnode.removeAttribute('rowspan');
             _pnode.removeAttribute('colspan');
         }
 
-        let mergeheadinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) => 
-            x <= config.rowIndex + config.spread.viewX && 
-            x + rowspan > config.rowIndex + config.spread.viewX && 
+        let mergeheadinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
+            x <= config.rowIndex + config.spread.viewX &&
+            x + rowspan > config.rowIndex + config.spread.viewX &&
             y <= config.colIndex + config.spread.viewY &&
-            y + colspan > config.colIndex + config.spread.viewY && 
+            y + colspan > config.colIndex + config.spread.viewY &&
             !(x === config.rowIndex + config.spread.viewX && y === config.colIndex + config.spread.viewY));
         if(mergeheadinfo) {
             //console.log(config.rowIndex, config.colIndex);
@@ -88,7 +88,7 @@ function TextBox(config, pNode) {
         if(config.colIndex >= config.spread.freezeArea.left) {
             colIndex += config.spread.viewY;
         }
-        
+
         if(config.colIndex === config.spread.freezeArea.left) {
             _class.push('cell-freeze-left');
         }
@@ -123,12 +123,12 @@ function TextBox(config, pNode) {
 
         if (config.spread.selectedArea.type === 'cell') {
 
-            let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) => 
+            let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
                 rowIndex > x && rowIndex < x + rowspan &&
                 colIndex > y && colIndex < y + colspan
             );
             if(mergeinfo) {
-                console.log(mergeinfo);
+                //console.log(mergeinfo);
             }
 
             if (rowIndex == config.spread.selectedArea.x &&
@@ -144,7 +144,7 @@ function TextBox(config, pNode) {
             }
             if (rowIndex == config.spread.selectedArea.maxx &&
                 colIndex >= config.spread.selectedArea.miny &&
-                colIndex <= config.spread.selectedArea.maxy - ) {
+                colIndex <= config.spread.selectedArea.maxy) {
                 _class.push('selected-area-bottom');
             }
 
@@ -166,12 +166,12 @@ function TextBox(config, pNode) {
             }
 
             //设置当前范围
-            if (rowIndex == config.spread.selectedArea.minx - 1) {
-                _class.push('selected-area-top');
-            }
-            if (rowIndex == config.spread.selectedArea.maxx - 1) {
-                _class.push('selected-area-bottom');
-            }
+            // if (rowIndex == config.spread.selectedArea.minx - 1) {
+            //     _class.push('selected-area-top');
+            // }
+            // if (rowIndex == config.spread.selectedArea.maxx - 1) {
+            //     _class.push('selected-area-bottom');
+            // }
 
         } else if (config.spread.selectedArea.type === 'col') {
             if (rowIndex == 0 && colIndex == config.spread.selectedArea.y - 1) {
@@ -179,12 +179,12 @@ function TextBox(config, pNode) {
             }
 
             //设置当前范围
-            if (colIndex == config.spread.selectedArea.miny - 1) {
-                _class.push('selected-area-left');
-            }
-            if (colIndex == config.spread.selectedArea.maxy - 1) {
-                _class.push('selected-area-right');
-            }
+            // if (colIndex == config.spread.selectedArea.miny - 1) {
+            //     _class.push('selected-area-left');
+            // }
+            // if (colIndex == config.spread.selectedArea.maxy - 1) {
+            //     _class.push('selected-area-right');
+            // }
         }
 
         let _className = _class.join(' '),

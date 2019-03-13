@@ -399,7 +399,7 @@ function Spread(config, pNode) {
      * 根据坐标点获取真实坐标
      */
     this.getCellPoint = function(x, y) {
-        
+
     }
 
     /**
@@ -649,7 +649,7 @@ function Spread(config, pNode) {
                         this.selectedArea.x2 = rowIndex;
                         this.selectedArea.y2 = colIndex;
                         this.selected = [];
-                        
+
                         for (let x = this.selectedArea.minx; x <= this.selectedArea.maxx; x++) {
                             for (let y = this.selectedArea.miny; y <= this.selectedArea.maxy; y++) {
                                 //if(!spread.areaMerge.find(([x1, y1, rowspan, colspan]) => x > x1 + rowspan && y > y1 + colspan)) {
@@ -667,10 +667,10 @@ function Spread(config, pNode) {
                     let _minx = minx, _miny = miny, _maxx = maxx, _maxy = maxy;
                     for (let x = minx; x <= maxx; x++) {
                         for (let y = miny; y <= maxy; y++) {
-                            let mergecell = spread.areaMerge.find(([x1, y1, rowspan, colspan]) => 
-                                x >= x1 && 
-                                x < x1 + rowspan && 
-                                y >= y1 && 
+                            let mergecell = spread.areaMerge.find(([x1, y1, rowspan, colspan]) =>
+                                x >= x1 &&
+                                x < x1 + rowspan &&
+                                y >= y1 &&
                                 y < y1 + colspan);
                             if(mergecell) {
                                 _minx = Math.min(_minx, mergecell[0]);
@@ -748,7 +748,7 @@ function Spread(config, pNode) {
             this.header.top.refresh();
             this.header.left.refresh();
         });
-        
+
         this.refreshSelected();
         this.refreshMerge();
         this.table.refresh();
@@ -796,8 +796,8 @@ let menu = new ContextMenu({
                     hidden: spread.selected.length <= 1 || spread.selectedArea.type !== 'cell'
                 }
             },
-            onClick(e) { 
-                console.log('当前合并的单元格', 
+            onClick(e) {
+                console.log('当前合并的单元格',
                     spread.selectedArea.minx,
                     spread.selectedArea.miny,
                     spread.selectedArea.maxx - spread.selectedArea.minx + 1,
@@ -818,7 +818,7 @@ let menu = new ContextMenu({
                     hidden: true
                 }
             },
-            onClick(e) { 
+            onClick(e) {
                 if(e && e.data) {
                     console.log(e);
                 }
