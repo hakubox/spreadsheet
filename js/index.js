@@ -1,134 +1,3 @@
-function numToString(numm) {
-    var stringArray = [];
-    var numToStringAction = function (nnum) {
-        var num = nnum - 1;
-        var a = parseInt(num / 26);
-        var b = num % 26;
-        stringArray.push(String.fromCharCode(64 + parseInt(b + 1)));
-        if (a > 0) {
-            numToStringAction(a);
-        }
-    }
-    numToStringAction(numm);
-    return stringArray.reverse().join("");
-}
-
-function HeaderCell(config, pNode) {
-    this.el = null;
-    this.txtEl = null;
-
-    this.render = function(parentNode) {
-        let el = document.createElement("li");
-        this.txtEl = document.createElement("span");
-        el.appendChild(this.txtEl);
-        this.split = document.createElement("div");
-        this.split.classList.add("header-split");
-        el.appendChild(this.split);
-        this.setIndex.call(this.txtEl, config.index);
-        el.data = config;
-
-        if(parentNode) {
-            parentNode.appendChild(el);
-        }
-
-        return el;
-    }
-
-    //设置展示下标
-    this.setIndex = function(index) {
-        (this.txtEl || this).innerHTML = config.headertype === 'top' ? numToString(index) : index;
-    }
-
-    //更新状态
-    this.refresh = function() {
-        let index = 0;
-        if(config.headertype === 'left') {
-            if(config.spread.freezeArea.top < config.index) {
-                index = config.index + config.spread.viewX - 1;
-            } else {
-                index = config.index - 1;
-            }
-        } else {
-            if(config.spread.freezeArea.left < config.index) {
-                index = config.index + config.spread.viewY - 1;
-            } else {
-                index = config.index - 1;
-            }
-        }
-
-        let headIndex = config.spread.selected.findIndex(([x, y]) =>
-            config.headertype === 'left' ? index === x : index === y
-        );
-
-        if(headIndex >= 0) {
-            this.el.classList.add('active');
-        } else {
-            this.el.classList.remove('active');
-        }
-    }
-
-    if(pNode) {
-        this.el = this.render(pNode);
-        if(config.onInit) {
-            config.onInit.call(this.el);
-        }
-    }
-}
-
-function HeaderList(config, pNode) {
-
-    this.data = [];
-
-    this.setStartIndex = function(startIndex) {
-        this.data.forEach((i, index) => {
-            if(config.headertype === 'top') {
-                if(index < config.spread.freezeArea.left) {
-                    i.setIndex(index + 1);
-                } else {
-                    i.setIndex(startIndex + index + 1);
-                }
-            } else if(config.headertype === 'left') {
-                if(index < config.spread.freezeArea.top) {
-                    i.setIndex(index + 1);
-                } else {
-                    i.setIndex(startIndex + index + 1);
-                }
-            }
-        });
-    }
-
-    this.refresh = function() {
-        this.data.forEach((i, index) => {
-            i.refresh();
-        });
-    }
-
-    this.render = function(parentNode) {
-        let el = document.createElement("ul");
-        el.classList.add('header-list');
-        el.setAttribute('type', config.headertype);
-        el.data = config;
-        Array(config.count).fill('').map((i, index) => {
-            let item = new HeaderCell({
-                ...config,
-                index: config.spread.viewX + index + 1
-            }, el);
-            this.data.push(item);
-        });
-        if(parentNode) {
-            parentNode.appendChild(el);
-        }
-        return el;
-    }
-
-    if(pNode) {
-        this.el = this.render(pNode);
-        if(config.onInit) {
-            config.onInit.call(this.el);
-        }
-    }
-}
-
 /**
  * @class 表格页
  */
@@ -273,6 +142,19 @@ function Spread(config, pNode) {
         top: null,
         left: null
     };
+    /**
+     * 滚动条
+     */
+    this.scroll = {
+        /**
+         * 纵向滚动条
+         */
+        vertical: null,
+        /**
+         * 横向滚动条
+         */
+        horizontal: null
+    }
     this.table = null;
 
     //设置值
@@ -484,19 +366,15 @@ function Spread(config, pNode) {
         fixedMain.appendChild(fixedMainBody);
         el.appendChild(fixedMain);
 
-        let elScrollX = document.createElement("div");
-        elScrollX.classList.add('haku-scroll', 'haku-scroll-x');
-        let elScrollBodyX = document.createElement("div");
-        elScrollBodyX.classList.add('haku-scroll-body');
-        elScrollX.appendChild(elScrollBodyX);
-        el.appendChild(elScrollX);
+        let scrollVertical = new Scroll({
+            type: 'vertical'
+        }, el);
+        this.scroll.vertical = scrollVertical;
 
-        let elScrollY = document.createElement("div");
-        elScrollY.classList.add('haku-scroll', 'haku-scroll-y');
-        let elScrollBodyY = document.createElement("div");
-        elScrollBodyY.classList.add('haku-scroll-body');
-        elScrollY.appendChild(elScrollBodyY);
-        el.appendChild(elScrollY);
+        let scrollHorizontal = new Scroll({
+            type: 'horizontal'
+        }, el);
+        this.scroll.horizontal = scrollHorizontal;
 
         if(parentNode) {
             parentNode.appendChild(el);
