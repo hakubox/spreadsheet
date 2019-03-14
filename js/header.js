@@ -28,7 +28,10 @@ function HeaderCell(config, pNode) {
         this.split.classList.add("header-split");
         el.appendChild(this.split);
         this.setIndex.call(this.txtEl, config.index);
-        el.data = config;
+        el.data = {
+            ...config,
+            component: 'HeaderCell'
+        };
 
         if(parentNode) {
             parentNode.appendChild(el);
@@ -113,7 +116,10 @@ function HeaderList(config, pNode) {
         let el = document.createElement("ul");
         el.classList.add('header-list');
         el.setAttribute('type', config.headertype);
-        el.data = config;
+        el.data = {
+            ...config,
+            component: 'HeaderList'
+        };
         Array(config.count).fill('').map((i, index) => {
             let item = new HeaderCell({
                 ...config,

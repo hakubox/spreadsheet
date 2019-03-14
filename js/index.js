@@ -30,25 +30,94 @@ function Spread(config, pNode) {
      * 显示纵坐标
      */
     let _viewY = 0;
+
+    /**
+     * 获取列宽度
+     */
+    this.getColWidth = function(x) {
+        return _colWidth[x] || _cellDefaultWidth;
+    }
+
+    /**
+     * 获取行高度
+     */
+    this.getRowHeight = function(y) {
+        return _rowHeight[y] || _cellDefaultHeight;
+    }
+
     Object.defineProperties(this, {
+        /**
+         * 当前头部的X坐标
+         */
         viewX: {
             get() {
                 return _viewX;
             },
             set(value) {
                 if(value < 0) value = 0;
+                else if(value > this.maxRowCount - this.minRowCount) {
+                    value = this.maxRowCount - this.minRowCount;
+                }
                 this.header.left.setStartIndex(value);
                 _viewX = value;
             }
         },
+        /**
+         * 当前左侧头部的Y坐标
+         */
         viewY: {
             get() {
                 return _viewY;
             },
             set(value) {
                 if(value < 0) value = 0;
+                else if(value > this.maxColCount - this.minColCount) {
+                    value = this.maxColCount - this.minColCount;
+                }
                 this.header.top.setStartIndex(value);
                 _viewY = value;
+            }
+        },
+        /**
+         * 最小行数（根据页面大小判断）
+         */
+        minRowCount: {
+            get() {
+                let _count = 0, _height = 0;
+                while(_height <= window.innerHeight) {
+                    _height += this.getRowHeight(_count);
+                    _count++;
+                }
+                return _count;
+            }
+        },
+        /**
+         * 最大行数
+         */
+        maxRowCount: {
+            get() {
+                return Math.max(this.viewData.length, 40);
+            }
+        },
+        /**
+         * 最小列数（根据页面大小判断）
+         */
+        minColCount: {
+            get() {
+                let _count = 0, _width = 0;
+                while(_width <= window.innerWidth) {
+                    _width += this.getColWidth(_count);
+                    _count++;
+                }
+                return _count;
+            }
+        },
+        /**
+         * 最大列数
+         */
+        maxColCount: {
+            get() {
+                return Math.max(Math.max.apply(0, this.viewData.filter(i => i).map(i => i.length)), 20);
             }
         }
     })
@@ -153,7 +222,10 @@ function Spread(config, pNode) {
         /**
          * 横向滚动条
          */
-        horizontal: null
+        horizontal: null,
+        location: 0,
+        location2: 0,
+        isStart: false,
     }
     this.table = null;
 
@@ -172,20 +244,6 @@ function Spread(config, pNode) {
             return '';
         }
         return this.viewData[x][y];
-    }
-
-    /**
-     * 获取列宽度
-     */
-    this.getColWidth = function(x) {
-        return _colWidth[x] || _cellDefaultWidth;
-    }
-
-    /**
-     * 获取行高度
-     */
-    this.getRowHeight = function(y) {
-        return _rowHeight[y] || _cellDefaultHeight;
     }
 
     /**
@@ -367,12 +425,14 @@ function Spread(config, pNode) {
         el.appendChild(fixedMain);
 
         let scrollVertical = new Scroll({
-            type: 'vertical'
+            type: 'vertical',
+            spread: this
         }, el);
         this.scroll.vertical = scrollVertical;
 
         let scrollHorizontal = new Scroll({
-            type: 'horizontal'
+            type: 'horizontal',
+            spread: this
         }, el);
         this.scroll.horizontal = scrollHorizontal;
 
@@ -435,62 +495,85 @@ function Spread(config, pNode) {
             if(!e.target || !e.target.data) {
                 return;
             }
-            if(e.target.data.headertype) {
-                if(e.target.data.headertype === 'left') {
-                    //行状态下判断取消
-                    if(e.buttons !== 1 && (e.target.data.index > this.selectedArea.maxx || e.target.data.index < this.selectedArea.minx)) {
+            let _refreshSelect = () => {
+                this.selectedArea.isStart = true;
+                this.refreshSelected();
+                this.header.top.refresh();
+                this.header.left.refresh();
+            };
+            switch(e.target.data.component) {
+                case 'TextBox':
+                    let colIndex = e.target.data.colIndex,
+                        rowIndex = e.target.data.rowIndex;
+                    //单元格状态下判断取消
+                    if(e.buttons !== 1 && this.selected.filter(([x, y]) => x === rowIndex && y === colIndex).length > 0) {
                         return;
                     }
-                    this.selectedArea.type = 'row';
-                    this.selectedArea.x = e.target.data.index;
-                    this.selectedArea.x2 = e.target.data.index;
-                    this.selected = Array(this.viewText[0].length).fill(null).map((i, index) => ([e.target.data.index - 1, index]));
-                } else if(e.target.data.headertype === 'top') {
-                    //列状态下判断取消
-                    if(e.buttons !== 1 && (e.target.data.index > this.selectedArea.maxy || e.target.data.index < this.selectedArea.miny)) {
-                        return;
+                    this.selectedArea.type = 'cell';
+                    if(e.target.data.rowIndex >= this.freezeArea.top) {
+                        rowIndex += this.viewX;
                     }
-                    this.selectedArea.type = 'col';
-                    this.selectedArea.y = e.target.data.index;
-                    this.selectedArea.y2 = e.target.data.index;
-                    this.selected = Array(this.viewText.length).fill(null).map((i, index) => ([index, e.target.data.index - 1]));
-                }
-            } else {
-                let colIndex = e.target.data.colIndex,
-                    rowIndex = e.target.data.rowIndex;
-                //单元格状态下判断取消
-                if(e.buttons !== 1 && this.selected.filter(([x, y]) => x === rowIndex && y === colIndex).length > 0) {
-                    return;
-                }
-                this.selectedArea.type = 'cell';
-                if(e.target.data.rowIndex >= this.freezeArea.top) {
-                    rowIndex += this.viewX;
-                }
-                if(e.target.data.colIndex >= this.freezeArea.left) {
-                    colIndex += this.viewY;
-                }
-                this.selectedArea.x = rowIndex;
-                this.selectedArea.y = colIndex;
-                this.selectedArea.x2 = rowIndex;
-                this.selectedArea.y2 = colIndex;
+                    if(e.target.data.colIndex >= this.freezeArea.left) {
+                        colIndex += this.viewY;
+                    }
+                    this.selectedArea.x = rowIndex;
+                    this.selectedArea.y = colIndex;
+                    this.selectedArea.x2 = rowIndex;
+                    this.selectedArea.y2 = colIndex;
 
-                let tdIndex = this.selected.findIndex(([x, y]) => x === rowIndex && y === colIndex);
-                if(tdIndex >= 0 && this.selected.length === 1) {
-                    this.selected = [[rowIndex, colIndex]];
-                    this.active = [rowIndex, colIndex];
-                    this.selectedArea.isStart = false;
-                } else {
-                    this.selected = [[rowIndex, e.target.data.colIndex]];
-                    this.active = [];
-                }
+                    let tdIndex = this.selected.findIndex(([x, y]) => x === rowIndex && y === colIndex);
+                    if(tdIndex >= 0 && this.selected.length === 1) {
+                        this.selected = [[rowIndex, colIndex]];
+                        this.active = [rowIndex, colIndex];
+                        this.selectedArea.isStart = false;
+                    } else {
+                        this.selected = [[rowIndex, e.target.data.colIndex]];
+                        this.active = [];
+                    }
+                    _refreshSelect();
+                    break;
+
+                case 'HeaderCell':
+                    if(e.target.data.headertype === 'left') {
+                        //行状态下判断取消
+                        if(e.buttons !== 1 && (e.target.data.index > this.selectedArea.maxx || e.target.data.index < this.selectedArea.minx)) {
+                            return;
+                        }
+                        this.selectedArea.type = 'row';
+                        this.selectedArea.x = e.target.data.index;
+                        this.selectedArea.x2 = e.target.data.index;
+                        this.selected = Array(this.viewText[0].length).fill(null).map((i, index) => ([e.target.data.index - 1, index]));
+                    } else if(e.target.data.headertype === 'top') {
+                        //列状态下判断取消
+                        if(e.buttons !== 1 && (e.target.data.index > this.selectedArea.maxy || e.target.data.index < this.selectedArea.miny)) {
+                            return;
+                        }
+                        this.selectedArea.type = 'col';
+                        this.selectedArea.y = e.target.data.index;
+                        this.selectedArea.y2 = e.target.data.index;
+                        this.selected = Array(this.viewText.length).fill(null).map((i, index) => ([index, e.target.data.index - 1]));
+                    }
+                    _refreshSelect();
+                    break;
+
+                case 'ScrollBar':
+                    if(e.target.data.type == 'vertical') {
+                        this.scroll.location = e.clientY - this.scroll.vertical.el.offsetTop - this.scroll.vertical.value;
+                        this.scroll.type = 'vertical';
+                    } else if (e.target.data.type == 'horizontal') {
+                        this.scroll.location = e.clientX - this.scroll.horizontal.el.offsetLeft - this.scroll.horizontal.value;
+                        this.scroll.type = 'horizontal';
+                    }
+                    // console.log(e);
+                    this.scroll.isStart = true;
+                    break;
             }
-            this.selectedArea.isStart = true;
-            this.refreshSelected();
-            this.header.top.refresh();
-            this.header.left.refresh();
+
+            // console.log(e.target.data.component);
         });
 
         document.body.addEventListener('mousemove', e => {
+            //开始选择区域
             if(this.selectedArea.isStart === true) {
                 if(!e.target || !e.target.data) {
                     return;
@@ -585,22 +668,41 @@ function Spread(config, pNode) {
                 this.refreshSelected();
                 this.header.top.refresh();
                 this.header.left.refresh();
+            } 
+            //开始拖拽滚动条
+            else if(this.scroll.isStart) {
+                if(this.scroll.type == 'vertical') {
+                    this.viewX = parseInt((e.pageY - this.scroll.vertical.el.offsetTop - this.scroll.location) / this.scroll.vertical.el.offsetHeight * this.maxRowCount);// - this.minRowCount
+                    this.scroll.vertical.refreshLocation();
+                } else if (this.scroll.type == 'horizontal') {
+                    this.viewY = parseInt((e.pageX - this.scroll.horizontal.el.offsetLeft - this.scroll.location) / this.scroll.horizontal.el.offsetWidth * this.maxColCount);// - this.minRowCount
+                    this.scroll.horizontal.refreshLocation();
+                }
             }
         });
         document.body.addEventListener('mouseup', e => {
             this.selectedArea.isStart = false;
+            this.scroll.isStart = false;
         });
         //滚轮滚动
         el.addEventListener('wheel', e => {
-            if(e.deltaY > 0) {
-                this.viewX += 3;
-            } else if(e.deltaY < 0) {
-                this.viewX -= 3;
-            } else if(e.deltaX > 0) {
-                this.viewY += 3;
-            } else if(e.deltaX < 0) {
-                this.viewY -= 3;
+            if(e.deltaY != 0) {
+                if(e.deltaY > 0) {
+                    this.viewX += 3;
+                } else if(e.deltaY < 0) {
+                    this.viewX -= 3;
+                }
+                this.scroll.vertical.refreshLocation();
             }
+            if(e.deltaX != 0) {
+                if(e.deltaX > 0) {
+                    this.viewY += 3;
+                } else if(e.deltaX < 0) {
+                    this.viewY -= 3;
+                }
+                this.scroll.horizontal.refreshLocation();
+            }
+            
             for (let x = 0; x < this.viewText.length; x++) {
                 for (let y = 0; y < this.viewText[x].length; y++) {
                     let _x = x, _y = y;
@@ -621,15 +723,27 @@ function Spread(config, pNode) {
                     }
                 }
             }
+
             this.refreshSelected();
             this.refreshMerge();
             this.header.top.refresh();
             this.header.left.refresh();
         });
 
+        window.addEventListener('resize', e => {
+            this.scroll.vertical.refresh();
+            this.scroll.horizontal.refresh();
+            this.scroll.vertical.refreshLocation();
+            this.scroll.horizontal.refreshLocation();
+        })
+
         this.refreshSelected();
         this.refreshMerge();
         this.table.refresh();
+        setTimeout(() => {
+            this.scroll.vertical.refresh();
+            this.scroll.horizontal.refresh();
+        }, 10);
         return el;
     };
 
@@ -675,12 +789,6 @@ let menu = new ContextMenu({
                 }
             },
             onClick(e) {
-                console.log('当前合并的单元格',
-                    spread.selectedArea.minx,
-                    spread.selectedArea.miny,
-                    spread.selectedArea.maxx - spread.selectedArea.minx + 1,
-                    spread.selectedArea.maxy - spread.selectedArea.miny + 1
-                );
                 spread.setMerge(
                     spread.selectedArea.minx,
                     spread.selectedArea.miny,

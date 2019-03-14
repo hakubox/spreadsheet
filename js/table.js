@@ -210,7 +210,10 @@ function TextBox(config, pNode) {
         el.freeze = config.freeze;
         // el.parentNode.style.width = config.spread.getColWidth(config.colIndex) + 'px';
         // el.parentNode.style.height = config.spread.getRowHeight(config.rowIndex + config.spread.viewX) + 'px';
-        el.data = config;
+        el.data = {
+            ...config,
+            component: 'TextBox'
+        };
         config.spread.viewText[config.rowIndex][config.colIndex] = this;
 
         if(parentNode) {
@@ -236,7 +239,10 @@ function Cell(config, pNode) {
 
     this.render = function(parentNode) {
         let el = document.createElement("td");
-        el.data = config;
+        el.data = {
+            ...config,
+            component: 'Cell'
+        };
         el.appendChild(new TextBox(config).render());
 
         if(parentNode) {
@@ -260,7 +266,10 @@ function Row(config, pNode) {
 
     this.render = function(parentNode) {
         let el = document.createElement("tr");
-        el.data = config;
+        el.data = {
+            ...config,
+            component: 'Row'
+        };
         Array(config.colNum).fill('').map((i, colIndex) => {
             el.appendChild(new Cell({
                 ...config,
@@ -297,7 +306,10 @@ function Table(config, pNode) {
 
     this.render = function(parentNode) {
         let el = document.createElement("table");
-        el.data = config;
+        el.data = {
+            ...config,
+            component: 'Table'
+        };
         el.appendChild(document.createElement("tbody"));
 
         Array(config.rowNum).fill('').map((i, rowIndex) => {
