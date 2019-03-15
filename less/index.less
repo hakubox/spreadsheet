@@ -326,6 +326,46 @@ body {
                     border: 1px solid white;
                 }
 
+
+                //拖拽框：左
+                &.drag-area-left {
+                    border-left-color: #4CAF50;
+                    border-left-style: dashed;
+                    // padding-left: 0px;
+
+                    &.drag-area-top {
+                        border-top-left-radius: 4px;
+                    }
+
+                    &.drag-area-bottom {
+                        border-bottom-left-radius: 4px;
+                    }
+                }
+                //拖拽框：右
+                &.drag-area-right {
+                    border-right-color: #4CAF50;
+                    border-right-style: dashed;
+
+                    &.drag-area-top {
+                        border-top-right-radius: 4px;
+                    }
+
+                    &.drag-area-bottom {
+                        border-bottom-right-radius: 4px;
+                    }
+                }
+                //拖拽框：上
+                &.drag-area-top {
+                    border-top-color: #4CAF50;
+                    border-top-style: dashed;
+                }
+                //拖拽框：下
+                &.drag-area-bottom {
+                    border-bottom-color: #4CAF50;
+                    border-bottom-style: dashed;
+                }
+
+
                 //选框：左
                 &.selected-area-left {
                     border-left-color: #2196F3;
@@ -660,6 +700,11 @@ body {
             }
         }
     }
+}
+
+.cursor-grab {
+    cursor: -webkit-grab !important;
+    cursor: -moz-grab !important;
 }
 
 // @keyframes rotate {

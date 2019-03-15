@@ -62,175 +62,14 @@ function TextBox(config, pNode) {
  */
 function Cell(config, pNode) {
     this.el = null;
-
+    this.data = config;
     this.isEdit = false;
-
-    /**
-     * 重绘合并状态
-     */
-    this.refreshMerge = function() {
-        let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
-            x === config.rowIndex + config.spread.viewX &&
-            y === config.colIndex + config.spread.viewY
-        );
-
-        if(config.colIndex === 0) {
-            this.el.parentNode.style.height = config.spread.getRowHeight(config.rowIndex) + 'px';
-        }
-        if(config.rowIndex === 0) {
-            this.el.parentNode.style.width = config.spread.getColWidth(config.colIndex) + 'px';
-        }
-
-        if(mergeinfo) {
-            // console.log(config.rowIndex, config.colIndex);
-            if(config.rowIndex - config.spread.freezeArea.top > 0) {
-                this.el.setAttribute('rowspan', mergeinfo[2]);
-            } else {
-                // this.el.setAttribute('rowspan', mergeinfo[2] + config.rowIndex - config.spread.freezeArea.top);
-                this.el.setAttribute('rowspan', 1);
-            }
-
-            this.el.setAttribute('colspan', mergeinfo[3]);
-        } else {
-            this.el.removeAttribute('rowspan');
-            this.el.removeAttribute('colspan');
-        }
-
-        let mergeheadinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
-            x <= config.rowIndex + config.spread.viewX &&
-            x + rowspan > config.rowIndex + config.spread.viewX &&
-            y <= config.colIndex + config.spread.viewY &&
-            y + colspan > config.colIndex + config.spread.viewY &&
-            !(x === config.rowIndex + config.spread.viewX && y === config.colIndex + config.spread.viewY));
-        if(mergeheadinfo) {
-            //console.log(config.rowIndex, config.colIndex);
-            this.el.classList.add('hidden');
-        } else {
-            this.el.classList.remove('hidden');
-        }
-    }
-
-    /**
-     * 重绘选中状态
-     */
-    this.refresh = function() {
-        let colIndex = config.colIndex,
-            rowIndex = config.rowIndex,
-            _class = [];
-        if(this.el.classList.contains('hidden')) {
-            _class.push('hidden');
-        }
-        if(config.rowIndex >= config.spread.freezeArea.top) {
-            rowIndex += config.spread.viewX;
-        }
-        if(config.colIndex >= config.spread.freezeArea.left) {
-            colIndex += config.spread.viewY;
-        }
-
-        if(config.colIndex === config.spread.freezeArea.left) {
-            _class.push('cell-freeze-left');
-        }
-        if(config.rowIndex === config.spread.freezeArea.top) {
-            _class.push('cell-freeze-top');
-        }
-
-        //活动单元格
-        if(config.spread.active[0] === rowIndex && config.spread.active[1] === colIndex) {
-            _class.push('focus');
-            if(this.isEdit === false) {
-                this.el.removeChild(this.Content.el);
-                this.el.appendChild(this.Content.render(this.Content.el));
-                this.Content.el.value = config.spread.getData(rowIndex, colIndex);
-                setTimeout(() => this.Content.el.focus(), 1);
-                this.isEdit = true;
-            }
-        } else {
-            if(this.isEdit === true) {
-                this.el.removeChild(this.Content.el);
-                this.el.appendChild(this.Content.render(this.Content.el));
-                this.Content.el.innerHTML = config.spread.getData(rowIndex, colIndex);
-                this.Content.el.focus();
-                this.isEdit = false;
-            }
-            //选中单元格
-            let td = config.spread.selected.find(([x, y]) => x === rowIndex && y === colIndex);
-            if(td) {
-                _class.push('selected');
-            }
-        }
-
-        if (config.spread.selectedArea.type === 'cell') {
-
-            let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
-                rowIndex > x && rowIndex < x + rowspan &&
-                colIndex > y && colIndex < y + colspan
-            );
-            if(mergeinfo) {
-                //console.log(mergeinfo);
-            }
-
-            if (rowIndex == config.spread.selectedArea.x &&
-                colIndex == config.spread.selectedArea.y) {
-                _class.push('selected-area-init');
-            }
-
-            //设置当前范围
-            if (rowIndex == config.spread.selectedArea.minx &&
-                colIndex >= config.spread.selectedArea.miny &&
-                colIndex <= config.spread.selectedArea.maxy) {
-                _class.push('selected-area-top');
-            }
-            if (rowIndex == config.spread.selectedArea.maxx &&
-                colIndex >= config.spread.selectedArea.miny &&
-                colIndex <= config.spread.selectedArea.maxy) {
-                _class.push('selected-area-bottom');
-            }
-
-            if (colIndex == config.spread.selectedArea.miny &&
-                rowIndex >= config.spread.selectedArea.minx &&
-                rowIndex <= config.spread.selectedArea.maxx) {
-                _class.push('selected-area-left');
-            }
-            if (colIndex == config.spread.selectedArea.maxy &&
-                rowIndex >= config.spread.selectedArea.minx &&
-                rowIndex <= config.spread.selectedArea.maxx) {
-                _class.push('selected-area-right');
-            }
-
-        } else if (config.spread.selectedArea.type === 'row') {
-
-            if (rowIndex == config.spread.selectedArea.x - 1 && colIndex == 0) {
-                _class.push('selected-area-init');
-            }
-
-            //设置当前范围
-            // if (rowIndex == config.spread.selectedArea.minx - 1) {
-            //     _class.push('selected-area-top');
-            // }
-            // if (rowIndex == config.spread.selectedArea.maxx - 1) {
-            //     _class.push('selected-area-bottom');
-            // }
-
-        } else if (config.spread.selectedArea.type === 'col') {
-            if (rowIndex == 0 && colIndex == config.spread.selectedArea.y - 1) {
-                _class.push('selected-area-init');
-            }
-
-            //设置当前范围
-            // if (colIndex == config.spread.selectedArea.miny - 1) {
-            //     _class.push('selected-area-left');
-            // }
-            // if (colIndex == config.spread.selectedArea.maxy - 1) {
-            //     _class.push('selected-area-right');
-            // }
-        }
-
-        let _className = _class.join(' '),
-            _oldClassName = this.el.className;
-        if(_className !== _oldClassName && (_className != '' || _oldClassName !== '')) {
-            this.el.className = _className;
-        }
-    }
+    this.selected = {
+        top: false,
+        botom: false,
+        left: false,
+        right: false
+    };
 
     this.render = function(parentNode) {
         let el = document.createElement("td");
@@ -238,6 +77,11 @@ function Cell(config, pNode) {
             ...config,
             component: 'Cell'
         };
+        el.addEventListener('mousedown', this.onMouseDown.bind(this));
+        el.addEventListener('mousemove', this.onMouseMove.bind(this));
+        el.addEventListener('mouseout', this.onMouseOut.bind(this));
+        
+        // let 
         this.Content = new TextBox({
             ...config,
             component: 'TextBox'
@@ -255,6 +99,255 @@ function Cell(config, pNode) {
         if(config.onInit) {
             config.onInit.call(this.el);
         }
+    }
+}
+
+/**
+ * 单元格:重绘合并状态
+ */
+Cell.prototype.refreshMerge = function() {
+    let mergeinfo = this.data.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
+        x === this.data.rowIndex + this.data.spread.viewX &&
+        y === this.data.colIndex + this.data.spread.viewY
+    );
+
+    if(this.data.colIndex === 0) {
+        this.el.parentNode.style.height = this.data.spread.getRowHeight(this.data.rowIndex) + 'px';
+    }
+    if(this.data.rowIndex === 0) {
+        this.el.parentNode.style.width = this.data.spread.getColWidth(this.data.colIndex) + 'px';
+    }
+
+    if(mergeinfo) {
+        // console.log(this.data.rowIndex, this.data.colIndex);
+        if(this.data.rowIndex - this.data.spread.freezeArea.top > 0) {
+            this.el.setAttribute('rowspan', mergeinfo[2]);
+        } else {
+            // this.el.setAttribute('rowspan', mergeinfo[2] + this.data.rowIndex - this.data.spread.freezeArea.top);
+            this.el.setAttribute('rowspan', 1);
+        }
+
+        this.el.setAttribute('colspan', mergeinfo[3]);
+    } else {
+        this.el.removeAttribute('rowspan');
+        this.el.removeAttribute('colspan');
+    }
+
+    let mergeheadinfo = this.data.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
+        x <= this.data.rowIndex + this.data.spread.viewX &&
+        x + rowspan > this.data.rowIndex + this.data.spread.viewX &&
+        y <= this.data.colIndex + this.data.spread.viewY &&
+        y + colspan > this.data.colIndex + this.data.spread.viewY &&
+        !(x === this.data.rowIndex + this.data.spread.viewX && y === this.data.colIndex + this.data.spread.viewY));
+    if(mergeheadinfo) {
+        //console.log(this.data.rowIndex, this.data.colIndex);
+        this.el.classList.add('hidden');
+    } else {
+        this.el.classList.remove('hidden');
+    }
+}
+
+/**
+ * 单元格:重绘选中状态
+ */
+Cell.prototype.refresh = function() {
+    let colIndex = this.data.colIndex,
+        rowIndex = this.data.rowIndex,
+        _class = [];
+    if(this.el.classList.contains('hidden')) {
+        _class.push('hidden');
+    }
+    if(this.data.rowIndex >= this.data.spread.freezeArea.top) {
+        rowIndex += this.data.spread.viewX;
+    }
+    if(this.data.colIndex >= this.data.spread.freezeArea.left) {
+        colIndex += this.data.spread.viewY;
+    }
+
+    if(this.data.colIndex === this.data.spread.freezeArea.left) {
+        _class.push('cell-freeze-left');
+    }
+    if(this.data.rowIndex === this.data.spread.freezeArea.top) {
+        _class.push('cell-freeze-top');
+    }
+
+    //活动单元格
+    if(this.data.spread.active[0] === rowIndex && this.data.spread.active[1] === colIndex) {
+        _class.push('focus');
+        if(this.isEdit === false) {
+            this.el.removeChild(this.Content.el);
+            this.el.appendChild(this.Content.render(this.Content.el));
+            this.Content.el.value = this.data.spread.getData(rowIndex, colIndex);
+            setTimeout(() => this.Content.el.focus(), 1);
+            this.isEdit = true;
+        }
+    } else {
+        if(this.isEdit === true) {
+            this.el.removeChild(this.Content.el);
+            this.el.appendChild(this.Content.render(this.Content.el));
+            this.Content.el.innerHTML = this.data.spread.getData(rowIndex, colIndex);
+            this.Content.el.focus();
+            this.isEdit = false;
+        }
+        //选中单元格
+        let td = this.data.spread.selected.find(([x, y]) => x === rowIndex && y === colIndex);
+        if(td) {
+            _class.push('selected');
+        }
+    }
+
+    if (this.data.spread.selectedArea.type === 'cell') {
+
+        let mergeinfo = this.data.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
+            rowIndex > x && rowIndex < x + rowspan &&
+            colIndex > y && colIndex < y + colspan
+        );
+        if(mergeinfo) {
+            //console.log(mergeinfo);
+        }
+
+        if (rowIndex == this.data.spread.selectedArea.x &&
+            colIndex == this.data.spread.selectedArea.y) {
+            _class.push('selected-area-init');
+        }
+
+        //设置当前范围
+        if (rowIndex == this.data.spread.selectedArea.minx &&
+            colIndex >= this.data.spread.selectedArea.miny &&
+            colIndex <= this.data.spread.selectedArea.maxy) {
+            _class.push('selected-area-top');
+            this.selected.top = true;
+        } else {
+            if (rowIndex == this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
+                colIndex >= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
+                colIndex <= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy) {
+                _class.push('drag-area-top');
+            }
+            this.selected.top = false;
+        }
+        if (rowIndex == this.data.spread.selectedArea.maxx &&
+            colIndex >= this.data.spread.selectedArea.miny &&
+            colIndex <= this.data.spread.selectedArea.maxy) {
+            _class.push('selected-area-bottom');
+            this.selected.bottom = true;
+        } else {
+            if (rowIndex == this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx &&
+                colIndex >= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
+                colIndex <= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy) {
+                _class.push('drag-area-bottom');
+            }
+            this.selected.bottom = false;
+        }
+
+        if (colIndex == this.data.spread.selectedArea.miny &&
+            rowIndex >= this.data.spread.selectedArea.minx &&
+            rowIndex <= this.data.spread.selectedArea.maxx) {
+            _class.push('selected-area-left');
+            this.selected.left = true;
+        } else {
+            if (colIndex == this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
+                rowIndex >= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
+                rowIndex <= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx) {
+                _class.push('drag-area-left');
+            }
+            this.selected.left = false;
+        }
+        if (colIndex == this.data.spread.selectedArea.maxy &&
+            rowIndex >= this.data.spread.selectedArea.minx &&
+            rowIndex <= this.data.spread.selectedArea.maxx) {
+            _class.push('selected-area-right');
+            this.selected.right = true;
+        } else {
+            if (colIndex == this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy &&
+                rowIndex >= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
+                rowIndex <= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx) {
+                _class.push('drag-area-right');
+            }
+            this.selected.right = false;
+        }
+
+    } else if (this.data.spread.selectedArea.type === 'row') {
+
+        if (rowIndex == this.data.spread.selectedArea.x - 1 && colIndex == 0) {
+            _class.push('selected-area-init');
+        }
+
+        //设置当前范围
+        // if (rowIndex == this.data.spread.selectedArea.minx - 1) {
+        //     _class.push('selected-area-top');
+        // }
+        // if (rowIndex == this.data.spread.selectedArea.maxx - 1) {
+        //     _class.push('selected-area-bottom');
+        // }
+
+    } else if (this.data.spread.selectedArea.type === 'col') {
+        if (rowIndex == 0 && colIndex == this.data.spread.selectedArea.y - 1) {
+            _class.push('selected-area-init');
+        }
+
+        //设置当前范围
+        // if (colIndex == this.data.spread.selectedArea.miny - 1) {
+        //     _class.push('selected-area-left');
+        // }
+        // if (colIndex == this.data.spread.selectedArea.maxy - 1) {
+        //     _class.push('selected-area-right');
+        // }
+    }
+
+    let _className = _class.join(' '),
+        _oldClassName = this.el.className;
+    if(_className !== _oldClassName && (_className != '' || _oldClassName !== '')) {
+        this.el.className = _className;
+    }
+}
+
+Cell.prototype.onMouseDown = function(e) {
+    console.log('mousedown')
+    if ((e.offsetY < 5 && this.selected.top) || 
+        (e.offsetY > e.target.offsetHeight - 5 && this.data.spread.viewCell[this.data.rowIndex + 1][this.data.colIndex].selected.top) ||
+        (e.offsetY > e.target.offsetHeight - 5 && this.selected.bottom) ||
+        (e.offsetY < 5 && this.data.spread.viewCell[this.data.rowIndex - 1][this.data.colIndex].selected.bottom) ||
+        (e.offsetX < 5 && this.selected.left) ||
+        (e.offsetX > e.target.offsetWidth - 5 && this.data.spread.viewCell[this.data.rowIndex][this.data.colIndex + 1].selected.left) ||
+        (e.offsetX > e.target.offsetWidth - 5 && this.selected.right) ||
+        (e.offsetX < 5 && this.data.spread.viewCell[this.data.rowIndex][this.data.colIndex - 1].selected.right)
+    ) {
+        this.data.spread.dragger.isStart = true;
+        this.data.spread.dragger.x = e.target.data.rowIndex;
+        this.data.spread.dragger.y = e.target.data.colIndex;
+    } else {
+        this.data.spread.dragger.isStart = false;
+    }
+}
+
+Cell.prototype.onMouseMove = function(e) {
+    if ((e.offsetY < 5 && this.selected.top) || 
+        (e.offsetY > e.target.offsetHeight - 5 && this.data.spread.viewCell[this.data.rowIndex + 1][this.data.colIndex].selected.top)
+    ) {
+        this.el.classList.add('cursor-grab');
+    } else if(
+        (e.offsetY > e.target.offsetHeight - 5 && this.selected.bottom) ||
+        (e.offsetY < 5 && this.data.spread.viewCell[this.data.rowIndex - 1][this.data.colIndex].selected.bottom)
+    ) {
+        this.el.classList.add('cursor-grab');
+    } else if(
+        (e.offsetX < 5 && this.selected.left) ||
+        (e.offsetX > e.target.offsetWidth - 5 && this.data.spread.viewCell[this.data.rowIndex][this.data.colIndex + 1].selected.left)
+    ) {
+        this.el.classList.add('cursor-grab');
+    } else if(
+        (e.offsetX > e.target.offsetWidth - 5 && this.selected.right) ||
+        (e.offsetX < 5 && this.data.spread.viewCell[this.data.rowIndex][this.data.colIndex - 1].selected.right)
+    ) {
+        this.el.classList.add('cursor-grab');
+    } else {
+        this.el.classList.remove('cursor-grab');
+    }
+}
+
+Cell.prototype.onMouseOut = function() {
+    if(this.el.classList.contains('cursor-grab')) {
+        this.el.classList.remove('cursor-grab');
     }
 }
 
