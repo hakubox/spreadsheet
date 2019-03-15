@@ -83,7 +83,7 @@ function Scroll(config, pNode) {
         // this.el.addEventListener('mousedown', e => {
         //     switch (e.target.data.component) {
         //         case 'Scroll':
-                    
+
         //             break;
         //         case 'ScrollBar':
         //             this.isStart = true;

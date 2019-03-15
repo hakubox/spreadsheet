@@ -12,8 +12,6 @@ function TextBox(config, pNode) {
     this.el = null;
     // this.call(new Input(config));
 
-    this.isEdit = false;
-
     //按键事件
     this.onKeyPress = function(event) {
         config.spread.inputKeyPress(
@@ -23,13 +21,54 @@ function TextBox(config, pNode) {
         );
     }
 
-    let _class = [];
+    this.render = function(parentNode) {
+        let el = null;
+
+        if(config.spread.active[0] === config.rowIndex + config.spread.viewX && config.spread.active[1] === config.colIndex) {
+            el = document.createElement("textarea");
+            el.type = "text";
+            el.classList.add("data-txt-input");
+            el.onkeydown = this.onKeyPress;
+        } else {
+            el = document.createElement("span");
+        }
+
+        el.classList.add("data-txt");
+        el.freeze = config.freeze;
+        // el.parentNode.style.width = config.spread.getColWidth(config.colIndex) + 'px';
+        // el.parentNode.style.height = config.spread.getRowHeight(config.rowIndex + config.spread.viewX) + 'px';
+        el.data = {
+            ...config,
+            component: 'TextBox'
+        };
+
+        if(parentNode) {
+            parentNode.appendChild(el);
+        }
+        this.el = el;
+        return el;
+    };
+
+    if(pNode) {
+        this.el = this.render(pNode);
+        if(config.onInit) {
+            config.onInit.call(this.el);
+        }
+    }
+}
+
+/**
+ * @class 单元格
+ */
+function Cell(config, pNode) {
+    this.el = null;
+
+    this.isEdit = false;
 
     /**
      * 重绘合并状态
      */
     this.refreshMerge = function() {
-        let _pnode = this.el.parentNode;
         let mergeinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
             x === config.rowIndex + config.spread.viewX &&
             y === config.colIndex + config.spread.viewY
@@ -45,16 +84,16 @@ function TextBox(config, pNode) {
         if(mergeinfo) {
             // console.log(config.rowIndex, config.colIndex);
             if(config.rowIndex - config.spread.freezeArea.top > 0) {
-                _pnode.setAttribute('rowspan', mergeinfo[2]);
+                this.el.setAttribute('rowspan', mergeinfo[2]);
             } else {
-                // _pnode.setAttribute('rowspan', mergeinfo[2] + config.rowIndex - config.spread.freezeArea.top);
-                _pnode.setAttribute('rowspan', 1);
+                // this.el.setAttribute('rowspan', mergeinfo[2] + config.rowIndex - config.spread.freezeArea.top);
+                this.el.setAttribute('rowspan', 1);
             }
 
-            _pnode.setAttribute('colspan', mergeinfo[3]);
+            this.el.setAttribute('colspan', mergeinfo[3]);
         } else {
-            _pnode.removeAttribute('rowspan');
-            _pnode.removeAttribute('colspan');
+            this.el.removeAttribute('rowspan');
+            this.el.removeAttribute('colspan');
         }
 
         let mergeheadinfo = config.spread.areaMerge.find(([x, y, rowspan, colspan]) =>
@@ -65,9 +104,9 @@ function TextBox(config, pNode) {
             !(x === config.rowIndex + config.spread.viewX && y === config.colIndex + config.spread.viewY));
         if(mergeheadinfo) {
             //console.log(config.rowIndex, config.colIndex);
-            _pnode.classList.add('hidden');
+            this.el.classList.add('hidden');
         } else {
-            _pnode.classList.remove('hidden');
+            this.el.classList.remove('hidden');
         }
     }
 
@@ -77,9 +116,8 @@ function TextBox(config, pNode) {
     this.refresh = function() {
         let colIndex = config.colIndex,
             rowIndex = config.rowIndex,
-            _pnode = this.el.parentNode;
-        _class = [];
-        if(_pnode.classList.contains('hidden')) {
+            _class = [];
+        if(this.el.classList.contains('hidden')) {
             _class.push('hidden');
         }
         if(config.rowIndex >= config.spread.freezeArea.top) {
@@ -100,18 +138,18 @@ function TextBox(config, pNode) {
         if(config.spread.active[0] === rowIndex && config.spread.active[1] === colIndex) {
             _class.push('focus');
             if(this.isEdit === false) {
-                _pnode.removeChild(this.el);
-                _pnode.appendChild(this.render(_pnode));
-                this.el.value = config.spread.getData(rowIndex, colIndex);
-                setTimeout(() => this.el.focus(), 1);
+                this.el.removeChild(this.Content.el);
+                this.el.appendChild(this.Content.render(this.Content.el));
+                this.Content.el.value = config.spread.getData(rowIndex, colIndex);
+                setTimeout(() => this.Content.el.focus(), 1);
                 this.isEdit = true;
             }
         } else {
             if(this.isEdit === true) {
-                _pnode.removeChild(this.el);
-                _pnode.appendChild(this.render(_pnode));
-                this.el.innerHTML = config.spread.getData(rowIndex, colIndex);
-                this.el.focus();
+                this.el.removeChild(this.Content.el);
+                this.el.appendChild(this.Content.render(this.Content.el));
+                this.Content.el.innerHTML = config.spread.getData(rowIndex, colIndex);
+                this.Content.el.focus();
                 this.isEdit = false;
             }
             //选中单元格
@@ -188,54 +226,11 @@ function TextBox(config, pNode) {
         }
 
         let _className = _class.join(' '),
-            _oldClassName = _pnode.className;
+            _oldClassName = this.el.className;
         if(_className !== _oldClassName && (_className != '' || _oldClassName !== '')) {
-            _pnode.className = _className;
+            this.el.className = _className;
         }
     }
-
-    this.render = function(parentNode) {
-        let el = null;
-
-        if(config.spread.active[0] === config.rowIndex + config.spread.viewX && config.spread.active[1] === config.colIndex) {
-            el = document.createElement("textarea");
-            el.type = "text";
-            el.classList.add("data-txt-input");
-            el.onkeydown = this.onKeyPress;
-        } else {
-            el = document.createElement("span");
-        }
-
-        el.classList.add("data-txt");
-        el.freeze = config.freeze;
-        // el.parentNode.style.width = config.spread.getColWidth(config.colIndex) + 'px';
-        // el.parentNode.style.height = config.spread.getRowHeight(config.rowIndex + config.spread.viewX) + 'px';
-        el.data = {
-            ...config,
-            component: 'TextBox'
-        };
-        config.spread.viewText[config.rowIndex][config.colIndex] = this;
-
-        if(parentNode) {
-            parentNode.appendChild(el);
-        }
-        this.el = el;
-        return el;
-    };
-
-    if(pNode) {
-        this.el = this.render(pNode);
-        if(config.onInit) {
-            config.onInit.call(this.el);
-        }
-    }
-}
-
-/**
- * @class 单元格
- */
-function Cell(config, pNode) {
-    this.el = null;
 
     this.render = function(parentNode) {
         let el = document.createElement("td");
@@ -243,7 +238,11 @@ function Cell(config, pNode) {
             ...config,
             component: 'Cell'
         };
-        el.appendChild(new TextBox(config).render());
+        this.Content = new TextBox({
+            ...config,
+            component: 'TextBox'
+        }, el);
+        config.spread.viewCell[config.rowIndex][config.colIndex] = this;
 
         if(parentNode) {
             parentNode.appendChild(el);
@@ -271,10 +270,10 @@ function Row(config, pNode) {
             component: 'Row'
         };
         Array(config.colNum).fill('').map((i, colIndex) => {
-            el.appendChild(new Cell({
+            new Cell({
                 ...config,
                 colIndex: colIndex
-            }).render());
+            }, el);
         });
 
         if(parentNode) {

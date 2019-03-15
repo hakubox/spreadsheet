@@ -140,7 +140,7 @@ function Spread(config, pNode) {
     /**
      * 当前显示文本框
      */
-    this.viewText = [];
+    this.viewCell = [];
     /**
      * 已选中区域
      */
@@ -235,7 +235,7 @@ function Spread(config, pNode) {
             this.viewData[x] = [];
         }
         this.viewData[x][y] = value;
-        this.viewText[x - this.viewX][y - this.viewY].el.value = value;
+        this.viewCell[x - this.viewX][y - this.viewY].el.value = value;
     }
 
     //获取值
@@ -251,12 +251,12 @@ function Spread(config, pNode) {
      */
     this.setColWidth = function(colIndex, width) {
         _colWidth[colIndex] = width;
-        spread.viewText.map((i, index) => i[colIndex]).forEach(i => i.el.style.width = width + 'px');
+        spread.viewCell.map((i, index) => i[colIndex]).forEach(i => i.el.style.width = width + 'px');
     }
 
     this.setRowHeight = function(rowIndex, height) {
         _rowHeight[rowIndex] = height;
-        spread.viewText[rowIndex].forEach(i => i.forEach(item => item.el.style.height = height + 'px'));
+        spread.viewCell[rowIndex].forEach(i => i.forEach(item => item.el.style.height = height + 'px'));
     }
 
     //设置当前焦点单元格
@@ -267,7 +267,7 @@ function Spread(config, pNode) {
         this.selectedArea.y = y;
         this.selectedArea.x2 = x;
         this.selectedArea.y2 = y;
-        //spread.viewText[x][y].el.click();
+        //spread.viewCell[x][y].el.click();
 
         this.refreshSelected();
         this.header.top.refresh();
@@ -325,14 +325,14 @@ function Spread(config, pNode) {
      * 重绘选中状态
      */
     this.refreshSelected = function() {
-        this.viewText.forEach(row => row.forEach(cell => cell.refresh()));
+        this.viewCell.forEach(row => row.forEach(cell => cell.refresh()));
     }
 
     /**
      * 重绘合并状态
      */
     this.refreshMerge = function() {
-        this.viewText.forEach(row => row.forEach(cell => cell.refreshMerge()));
+        this.viewCell.forEach(row => row.forEach(cell => cell.refreshMerge()));
     }
 
     /**
@@ -487,7 +487,7 @@ function Spread(config, pNode) {
                 this.active = this.selected[0];
                 this.refreshSelected();
                 //this.setData(this.selected[0][0], this.selected[0][1], this.viewData[this.selected[0][0]][this.selected[0][1]] + e.key);
-                // this.viewText[this.selected[0][0]][this.selected[0][1]].el.onkeypress(e);
+                // this.viewCell[this.selected[0][0]][this.selected[0][1]].el.onkeypress(e);
             }
         })
         //鼠标拖拽框选
@@ -542,7 +542,7 @@ function Spread(config, pNode) {
                         this.selectedArea.type = 'row';
                         this.selectedArea.x = e.target.data.index;
                         this.selectedArea.x2 = e.target.data.index;
-                        this.selected = Array(this.viewText[0].length).fill(null).map((i, index) => ([e.target.data.index - 1, index]));
+                        this.selected = Array(this.viewCell[0].length).fill(null).map((i, index) => ([e.target.data.index - 1, index]));
                     } else if(e.target.data.headertype === 'top') {
                         //列状态下判断取消
                         if(e.buttons !== 1 && (e.target.data.index > this.selectedArea.maxy || e.target.data.index < this.selectedArea.miny)) {
@@ -551,7 +551,7 @@ function Spread(config, pNode) {
                         this.selectedArea.type = 'col';
                         this.selectedArea.y = e.target.data.index;
                         this.selectedArea.y2 = e.target.data.index;
-                        this.selected = Array(this.viewText.length).fill(null).map((i, index) => ([index, e.target.data.index - 1]));
+                        this.selected = Array(this.viewCell.length).fill(null).map((i, index) => ([index, e.target.data.index - 1]));
                     }
                     _refreshSelect();
                     break;
@@ -587,12 +587,12 @@ function Spread(config, pNode) {
                 if(e.target.data.headertype) {
                     if(e.target.data.headertype === 'left') {
                         this.selectedArea.x2 = e.target.data.index;
-                        this.selected = [].concat.apply([], Array(this.viewText[0].length).fill(null).map((i, index) => {
+                        this.selected = [].concat.apply([], Array(this.viewCell[0].length).fill(null).map((i, index) => {
                             return (Array(this.selectedArea.maxx - this.selectedArea.minx + 1).fill(null).map((o, oIndex) => ([oIndex + this.selectedArea.minx - 1, index])))
                         }))
                     } else if(e.target.data.headertype === 'top') {
                         this.selectedArea.y2 = e.target.data.index;
-                        this.selected = [].concat.apply([], Array(this.viewText.length).fill(null).map((i, index) => {
+                        this.selected = [].concat.apply([], Array(this.viewCell.length).fill(null).map((i, index) => {
                             return (Array(this.selectedArea.maxy - this.selectedArea.miny + 1).fill(null).map((o, oIndex) => ([index, oIndex + this.selectedArea.miny - 1])))
                         }))
                     }
@@ -668,7 +668,7 @@ function Spread(config, pNode) {
                 this.refreshSelected();
                 this.header.top.refresh();
                 this.header.left.refresh();
-            } 
+            }
             //开始拖拽滚动条
             else if(this.scroll.isStart) {
                 if(this.scroll.type == 'vertical') {
@@ -702,9 +702,9 @@ function Spread(config, pNode) {
                 }
                 this.scroll.horizontal.refreshLocation();
             }
-            
-            for (let x = 0; x < this.viewText.length; x++) {
-                for (let y = 0; y < this.viewText[x].length; y++) {
+
+            for (let x = 0; x < this.viewCell.length; x++) {
+                for (let y = 0; y < this.viewCell[x].length; y++) {
                     let _x = x, _y = y;
                     if(x < this.freezeArea.top) {
 
@@ -717,9 +717,9 @@ function Spread(config, pNode) {
                         _y += this.viewY;
                     }
                     if(this.viewData[_x] && this.viewData[_x][_y]) {
-                        this.viewText[x][y].el.innerHTML = this.viewData[_x][_y];
+                        this.viewCell[x][y].Content.el.innerHTML = this.viewData[_x][_y];
                     } else {
-                        this.viewText[x][y].el.innerHTML = "";
+                        this.viewCell[x][y].Content.el.innerHTML = "";
                     }
                 }
             }
@@ -753,7 +753,7 @@ function Spread(config, pNode) {
     (() => {
         _colWidth = new Array(this.rowNum).fill(_cellDefaultWidth);
         _rowHeight = new Array(this.colNum).fill(_cellDefaultHeight);
-        this.viewText = new Array(this.rowNum).fill(null).map(i => []).map(i => new Array(this.colNum).fill('').map(i => []));
+        this.viewCell = new Array(this.rowNum).fill(null).map(i => []).map(i => new Array(this.colNum).fill('').map(i => []));
     })();
 
     if(pNode) {
