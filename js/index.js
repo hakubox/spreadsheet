@@ -259,6 +259,7 @@ function Spread(config, pNode) {
      * 拖拽
      */
     this.dragger = {
+        el: null,
         isStart: false,
         x: 0,
         y: 0,
@@ -443,6 +444,12 @@ function Spread(config, pNode) {
         this.panels.main = fixedMain;
         fixedMain.classList.add('haku-spreadsheet-main');
 
+        //拖拽区域框
+        let dragArea = document.createElement("div");
+        dragArea.classList.add("dragarea");
+        fixedMain.appendChild(dragArea);
+        this.dragger.el = dragArea;
+
 
         let fixedMainBody = document.createElement("div");
         fixedMainBody.classList.add('haku-spreadsheet-main-body');
@@ -533,7 +540,6 @@ function Spread(config, pNode) {
             if(!e.target || !e.target.data) {
                 return;
             }
-            console.log(this.dragger.isStart);
             if(this.dragger.isStart) {
                 /**
                  * 拖拽在单元格内事件处理
@@ -718,7 +724,7 @@ function Spread(config, pNode) {
                 this.refreshSelected();
                 this.header.top.refresh();
                 this.header.left.refresh();
-            } 
+            }
             //开始拖拽区域
             else if(this.dragger.isStart === true) {
                 if(!e.target || !e.target.data) {
@@ -729,9 +735,6 @@ function Spread(config, pNode) {
 
                 this.dragger.x2 = rowIndex;
                 this.dragger.y2 = colIndex;
-
-                
-                console.log(this.dragger.x2, this.dragger.x, this.selectedArea.minx);
 
                 this.refreshSelected();
                 this.header.top.refresh();

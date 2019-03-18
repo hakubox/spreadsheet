@@ -80,8 +80,8 @@ function Cell(config, pNode) {
         el.addEventListener('mousedown', this.onMouseDown.bind(this));
         el.addEventListener('mousemove', this.onMouseMove.bind(this));
         el.addEventListener('mouseout', this.onMouseOut.bind(this));
-        
-        // let 
+
+        // let
         this.Content = new TextBox({
             ...config,
             component: 'TextBox'
@@ -211,6 +211,42 @@ Cell.prototype.refresh = function() {
             _class.push('selected-area-init');
         }
 
+        // //设置当前拖拽范围
+        // if(this.data.spread.dragger.isStart) {
+        //     if (rowIndex == this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
+        //         colIndex >= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
+        //         colIndex <= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy) {
+        //         _class.push('drag-area-top');
+        //     }
+        //     if (rowIndex == this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx &&
+        //         colIndex >= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
+        //         colIndex <= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy) {
+        //         _class.push('drag-area-bottom');
+        //     }
+        //     if (colIndex == this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
+        //         rowIndex >= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
+        //         rowIndex <= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx) {
+        //         _class.push('drag-area-left');
+        //     }
+        //     if (colIndex == this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy &&
+        //         rowIndex >= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
+        //         rowIndex <= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx) {
+        //         _class.push('drag-area-right');
+        //     }
+        // }
+        if(this.data.spread.dragger.isStart) {
+            let _topIndex = this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx,
+                _leftIndex = this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny;
+            let _top = Array(_topIndex).fill('').map((i, index) => this.data.spread.getRowHeight(index + _topIndex)).reduce((a, b) => a + b),
+                _height = Array(this.data.spread.selectedArea.maxx + 1).slice(this.data.spread.selectedArea.minx).fill('').map((i, index) => this.data.spread.getRowHeight(index + this.data.spread.selectedArea.minx)).reduce((a, b) => a + b),
+                _left = Array(_leftIndex).fill('').map((i, index) => this.data.spread.getColWidth(index + _leftIndex)).reduce((a, b) => a + b),
+                _width = Array(this.data.spread.selectedArea.maxy + 1).slice(this.data.spread.selectedArea.miny).fill('').map((i, index) => this.data.spread.getColWidth(index + this.data.spread.selectedArea.miny)).reduce((a, b) => a + b);
+            // console.log(_top, _height, _left, _width);
+            this.data.spread.dragger.el.style.transform = 'translate(' + _left + 'px,' + _top + 'px)';
+            this.data.spread.dragger.el.style.width = _width + 'px';
+            this.data.spread.dragger.el.style.height = _height + 'px';
+        }
+
         //设置当前范围
         if (rowIndex == this.data.spread.selectedArea.minx &&
             colIndex >= this.data.spread.selectedArea.miny &&
@@ -218,11 +254,6 @@ Cell.prototype.refresh = function() {
             _class.push('selected-area-top');
             this.selected.top = true;
         } else {
-            if (rowIndex == this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
-                colIndex >= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
-                colIndex <= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy) {
-                _class.push('drag-area-top');
-            }
             this.selected.top = false;
         }
         if (rowIndex == this.data.spread.selectedArea.maxx &&
@@ -231,25 +262,14 @@ Cell.prototype.refresh = function() {
             _class.push('selected-area-bottom');
             this.selected.bottom = true;
         } else {
-            if (rowIndex == this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx &&
-                colIndex >= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
-                colIndex <= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy) {
-                _class.push('drag-area-bottom');
-            }
             this.selected.bottom = false;
         }
-
         if (colIndex == this.data.spread.selectedArea.miny &&
             rowIndex >= this.data.spread.selectedArea.minx &&
             rowIndex <= this.data.spread.selectedArea.maxx) {
             _class.push('selected-area-left');
             this.selected.left = true;
         } else {
-            if (colIndex == this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
-                rowIndex >= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
-                rowIndex <= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx) {
-                _class.push('drag-area-left');
-            }
             this.selected.left = false;
         }
         if (colIndex == this.data.spread.selectedArea.maxy &&
@@ -258,11 +278,6 @@ Cell.prototype.refresh = function() {
             _class.push('selected-area-right');
             this.selected.right = true;
         } else {
-            if (colIndex == this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy &&
-                rowIndex >= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
-                rowIndex <= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx) {
-                _class.push('drag-area-right');
-            }
             this.selected.right = false;
         }
 
@@ -302,8 +317,7 @@ Cell.prototype.refresh = function() {
 }
 
 Cell.prototype.onMouseDown = function(e) {
-    console.log('mousedown')
-    if ((e.offsetY < 5 && this.selected.top) || 
+    if ((e.offsetY < 5 && this.selected.top) ||
         (e.offsetY > e.target.offsetHeight - 5 && this.data.spread.viewCell[this.data.rowIndex + 1][this.data.colIndex].selected.top) ||
         (e.offsetY > e.target.offsetHeight - 5 && this.selected.bottom) ||
         (e.offsetY < 5 && this.data.spread.viewCell[this.data.rowIndex - 1][this.data.colIndex].selected.bottom) ||
@@ -321,27 +335,31 @@ Cell.prototype.onMouseDown = function(e) {
 }
 
 Cell.prototype.onMouseMove = function(e) {
-    if ((e.offsetY < 5 && this.selected.top) || 
-        (e.offsetY > e.target.offsetHeight - 5 && this.data.spread.viewCell[this.data.rowIndex + 1][this.data.colIndex].selected.top)
-    ) {
-        this.el.classList.add('cursor-grab');
-    } else if(
-        (e.offsetY > e.target.offsetHeight - 5 && this.selected.bottom) ||
-        (e.offsetY < 5 && this.data.spread.viewCell[this.data.rowIndex - 1][this.data.colIndex].selected.bottom)
-    ) {
-        this.el.classList.add('cursor-grab');
-    } else if(
-        (e.offsetX < 5 && this.selected.left) ||
-        (e.offsetX > e.target.offsetWidth - 5 && this.data.spread.viewCell[this.data.rowIndex][this.data.colIndex + 1].selected.left)
-    ) {
-        this.el.classList.add('cursor-grab');
-    } else if(
-        (e.offsetX > e.target.offsetWidth - 5 && this.selected.right) ||
-        (e.offsetX < 5 && this.data.spread.viewCell[this.data.rowIndex][this.data.colIndex - 1].selected.right)
-    ) {
-        this.el.classList.add('cursor-grab');
-    } else {
-        this.el.classList.remove('cursor-grab');
+    try {
+        if ((e.offsetY < 5 && this.selected.top) ||
+            (e.offsetY > e.target.offsetHeight - 5 && this.data.spread.viewCell[this.data.rowIndex + 1][this.data.colIndex].selected.top)
+        ) {
+            this.el.classList.add('cursor-grab');
+        } else if(
+            (e.offsetY > e.target.offsetHeight - 5 && this.selected.bottom) ||
+            (e.offsetY < 5 && this.data.rowIndex > 0 && this.data.spread.viewCell[this.data.rowIndex - 1][this.data.colIndex].selected.bottom)
+        ) {
+            this.el.classList.add('cursor-grab');
+        } else if(
+            (e.offsetX < 5 && this.selected.left) ||
+            (e.offsetX > e.target.offsetWidth - 5 && this.data.spread.viewCell[this.data.rowIndex][this.data.colIndex + 1].selected.left)
+        ) {
+            this.el.classList.add('cursor-grab');
+        } else if(
+            (e.offsetX > e.target.offsetWidth - 5 && this.selected.right) ||
+            (e.offsetX < 5 && this.data.colIndex > 0 && this.data.spread.viewCell[this.data.rowIndex][this.data.colIndex - 1].selected.right)
+        ) {
+            this.el.classList.add('cursor-grab');
+        } else {
+            this.el.classList.remove('cursor-grab');
+        }
+    } catch (error) {
+        console.log(error);
     }
 }
 
