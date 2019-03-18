@@ -1,0 +1,32 @@
+{
+  "name": "spreadsheet",
+  "version": "1.0.0",
+  "description": "由原生js及dom节点构造、可在线编辑的电子表格",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hakubox/spreadsheet.git"
+  },
+  "author": "hakubox",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hakubox/spreadsheet/issues"
+  },
+  "homepage": "https://github.com/hakubox/spreadsheet#readme",
+  "devDependencies": {
+    "browser-sync": "^2.26.3",
+    "del": "^4.0.0",
+    "gulp": "^4.0.0",
+    "gulp-autoprefixer": "^6.0.0",
+    "gulp-if": "^2.0.2",
+    "gulp-imagemin": "^5.0.3",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-uglify": "^3.0.2",
+    "gulp-useref": "^3.1.6"
+  }
+}

@@ -1,8 +1,4 @@
-// out: ../css/index.css, compress: true, sourceMap: true
-
-//系统变量
-@color-table-border: #DDD;
-@scroll-width: 17px;
+@import 'variables.scss';
 
 body {
     margin: 0px;
@@ -29,7 +25,7 @@ body {
         position: absolute;
         top: 20px;
         width: 50px;
-        height: ~'calc(100% - 20px)';
+        height: calc(100% - 20px);
         overflow: hidden;
         background-color: #EEE;
 
@@ -59,8 +55,8 @@ body {
                     cursor: url('data:application/octet-stream;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxMTFrMjIyPQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARUVF4kREROgyMjIrAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjIyFGBgYO6kpKT/SEhI7TQ0NEEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAyMjJGMTExNzExMTcxMTE3MDAwIDY2NnhgYGDu6+vr/7m5uf9EREToMjIyPQAAAAAAAAAAAAAAADIyMj1GRkbIWVlZ6FlZWehycnLfa2tr4UtLS+9ISEjtu7u79Ofn5//Q0ND/pqam/zw8PPEwMDAgAAAAAAAAAAAzMzO9SUlJ+fPz8//m5ub/8vLy/8HBwf/Gxsb/9/f3////////////ycnJ/9bW1v+cnJz/Nzc37C8vLwwAAAAAMTExiVNTU+H///////////f39//w8PD////////////////////////////Gxsb/09PT/6urq/88PDzxMjIyYzAwMDNSUlLL4ODg////////////////////////////////////////////0NDQ/9zc3P/Gxsb/PDw88TIyMmMyMjIUVlZWvNbW1v////////////////////////////////////////////////+kpKT/PDw88S0tLRoAAAAANDQ0Az09PZZdXV35q6ur/4uLi/mGhobyiYmJ9YmJifWFhYX33Nzc///////r6+v/MzMz/zIyMkYAAAAAAAAAAAAAAAAxMTEQPT09lklJSaA9PT2WOTk5hjk5OYY2NjZ4Nzc37KSkpPn/////SUlJ+TExMWsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC8vL4GRkZH/jIyM/0FBQaoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxMTE3MzMz/01NTb4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADExMYkwMDAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP8/AAD/HwAA/g8AAMAHAAAAAwAAAAEAAAAAAAAAAAAAAAEAAAADAACABwAA/w8AAP8fAAD/nwAA//8AAA=='),auto;
                     top: 3px;
                     left: 0px;
-                    width: ~'calc(100% + 2px)';
-                    height: ~'calc(100% - 6px)';
+                    width: calc(100% + 2px);
+                    height: calc(100% - 6px);
                 }
 
                 &:hover {
@@ -82,7 +78,7 @@ body {
                     cursor: n-resize;
                     bottom: -5px;
                     left: 0px;
-                    width: ~'calc(100% + 2px)';
+                    width: calc(100% + 2px);
                     height: 10px;
                     z-index: 2;
                 }
@@ -95,7 +91,7 @@ body {
         position: absolute;
         top: 0px;
         left: 50px;
-        width: ~'calc(100% - 50px)';
+        width: calc(100% - 50px);
         height: 20px;
         overflow: hidden;
         background-color: #EEE;
@@ -131,7 +127,7 @@ body {
                     top: 0px;
                     left: 0px;
                     width: 100%;
-                    height: ~'calc(100% + 2px)';
+                    height: calc(100% + 2px);
                 }
 
                 &:hover {
@@ -154,7 +150,7 @@ body {
                     top: 0px;
                     left: -5px;
                     width: 10px;
-                    height: ~'calc(100% + 2px)';
+                    height: calc(100% + 2px);
                     z-index: 2;
                 }
             }
@@ -163,8 +159,8 @@ body {
 
     > .haku-spreadsheet-main {
         position: relative;
-        height: ~'calc(100% - 20px)';
-        width: ~'calc(100% - 50px)';
+        height: calc(100% - 20px);
+        width: calc(100% - 50px);
         overflow: hidden; //overflow: scroll;
         top: 20px;
         left: 50px;
@@ -172,100 +168,6 @@ body {
         > .haku-spreadsheet-main-body {
             position: relative;
             display: block;
-
-            > table {
-                input {
-                }
-            }
-        }
-    }
-
-    > .haku-spreadsheet-fixed-top {
-        position: absolute;
-        overflow: hidden;
-        top: 20px;
-        left: 50px;
-        height: 53px;
-        width: ~'calc(100% - 50px)';
-        z-index: 2;
-    }
-
-    > .haku-spreadsheet-fixed-right {
-        position: absolute;
-        overflow: hidden;
-        top: 20px;
-        right: @scroll-width;
-        width: 102px;
-        height: ~'calc(100%)';
-        z-index: 2;
-
-        > .haku-table-fixed-right {
-            position: absolute;
-            right: 0;
-        }
-
-        > .haku-spreadsheet-fixed-right-body {
-            position: absolute;
-            overflow: hidden;
-            top: 0px;
-            right: 0px;
-            width: 102px;
-            height: 100%;
-
-            > .haku-table-fixed-right {
-                position: absolute;
-                right: 0px;
-            }
-        }
-    }
-
-    > .haku-spreadsheet-fixed-bottom {
-        position: absolute;
-        overflow: hidden;
-        bottom: 20px;
-        left: 0px;
-        height: 100px;
-        width: ~'calc(100% - 17px)';
-        z-index: 2;
-
-        > .haku-table-fixed-bottom {
-            position: absolute;
-            bottom: 0px;
-        }
-    }
-
-    > .haku-spreadsheet-fixed-left {
-        position: absolute;
-        overflow: hidden;
-        top: 20px;
-        left: 50px;
-        width: 102px;
-        height: ~'calc(100% - 17px - 20px)';
-        z-index: 2;
-    }
-
-    > .haku-spreadsheet-fixed-top-left {
-        position: absolute;
-        overflow: hidden;
-        top: 20px;
-        left: 50px;
-        width: 102px;
-        height: 53px;
-        z-index: 2;
-    }
-
-    > .haku-spreadsheet-fixed-top-right {
-        position: absolute;
-        overflow: hidden;
-        top: 0px;
-        right: @scroll-width;
-        width: 102px;
-        height: 53px;
-        z-index: 2;
-
-        > .haku-table-fixed-top-right {
-            position: absolute;
-            right: 0;
         }
     }
 }
@@ -273,22 +175,18 @@ body {
 //内容表格
 .haku-table {
     border-spacing: 0px;
-    // display: block;
 
     > tbody {
-        // display: block;
 
         > tr {
-            // display: block;
             white-space: nowrap;
 
             > td {
-                // display: inline-block;
                 position: relative;
                 box-sizing: border-box;
                 padding: 0px;
-                border-top: 1px solid @color-table-border;
-                border-left: 1px solid @color-table-border;
+                border-top: 1px solid $--color-table-border;
+                border-left: 1px solid $--color-table-border;
                 border-bottom: 1px solid transparent;
                 border-right: 1px solid transparent;
                 background-color: white;
@@ -368,7 +266,7 @@ body {
 
                 //选框：左
                 &.selected-area-left {
-                    border-left-color: #2196F3;
+                    border-left-color: $--color-main;
                     // padding-left: 0px;
                     box-shadow: 2px 0px 0 0px white inset;
 
@@ -392,7 +290,7 @@ body {
                 }
                 //选框：右
                 &.selected-area-right {
-                    border-right-color: #2196F3;
+                    border-right-color: $--color-main;
                     // padding-right: 0px;
                     box-shadow: -2px 0px 0 0px white inset;
 
@@ -412,13 +310,13 @@ body {
                 }
                 //选框：上
                 &.selected-area-top {
-                    border-top-color: #2196F3;
+                    border-top-color: $--color-main;
                     // padding-top: 0px;
                     box-shadow: 0px 2px 0 0px white inset;
                 }
                 //选框：下
                 &.selected-area-bottom {
-                    border-bottom-color: #2196F3;
+                    border-bottom-color: $--color-main;
                     // padding-bottom: 0px;
                     box-shadow: 0px -2px 0 0px white inset;
                 }
@@ -489,7 +387,7 @@ body {
                 }
 
                 &:last-child {
-                    border-right: 1px solid @color-table-border;
+                    border-right: 1px solid $--color-table-border;
                 }
 
                 // &:before {
@@ -507,64 +405,8 @@ body {
             &:last-child {
 
                 > td {
-                    border-bottom: 1px solid @color-table-border;
+                    border-bottom: 1px solid $--color-table-border;
                 }
-            }
-        }
-    }
-}
-
-//右键菜单
-.context-menu {
-    position: fixed;
-    display: none;
-    margin: 0px;
-    padding: 1px 0px 3px 0px;
-    background-color: white;
-    border: 1px solid #BBB;
-    border-radius: 4px;
-    border-top-left-radius: 0px;
-    min-width: 150px;
-    box-shadow: 2px 2px 3px 1px rgba(0,0,0,0.1);
-    z-index: 3;
-
-    &.context-menu-show {
-        display: inline-block;
-    }
-
-    > li {
-        position: relative;
-        cursor: pointer;
-        display: block;
-        padding: 0px 3px 0px 10px;
-        box-sizing: border-box;
-        width: 100%;
-        color: #666;
-        font-size: 12px;
-        line-height: 22px;
-        white-space: nowrap;
-
-        &.hidden {
-            display: none;
-        }
-
-        > span {
-            display: inline-block;
-        }
-
-        > key {
-            float: right;
-            color: #CCC;
-            font-size: 12px;
-            transform: scale(.9);
-            margin-left: 10px;
-        }
-
-        &:hover {
-            background-color: #EEE;
-
-            > key {
-                color: #2196F3;
             }
         }
     }
@@ -633,7 +475,7 @@ body {
         top: 30px;
         right: 5px;
         width: 14px;
-        height: ~'calc(100% - 50px)';
+        height: calc(100% - 50px);
 
         > .scroll-bar {
             top: 2px;
@@ -669,7 +511,7 @@ body {
         left: 60px;
         bottom: 5px;
         height: 14px;
-        width: ~'calc(100% - 80px)';
+        width: calc(100% - 80px);
 
         > .scroll-bar {
             left: 2px;
