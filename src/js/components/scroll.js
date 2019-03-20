@@ -1,5 +1,5 @@
 ﻿
-function ScrollBar(config, pNode) {
+export function ScrollBar(config, pNode) {
     this.el = null;
     this.txtEl = null;
 
@@ -33,7 +33,7 @@ function ScrollBar(config, pNode) {
 /**
  * 滚动条
  */
-function Scroll(config, pNode) {
+export function Scroll(config, pNode) {
     this.el = null;
     this.data = [];
     this.scrollBar = null;

@@ -1,14 +1,13 @@
+import { HeaderList } from './header.js'
+import { Table } from './table.js'
+import { Scroll } from './scroll.js'
+import { global_config } from './../config.js'
+
 /**
  * @class 表格页
  */
-function Spread(config, pNode) {
+export function Spread(config, pNode) {
     this.el = null;
-
-    /**
-     * 默认单元格宽度
-     */
-    let _cellDefaultWidth = 100;
-    let _cellDefaultHeight = 25;
     /**
      * 是否为编辑状态
      */
@@ -35,14 +34,14 @@ function Spread(config, pNode) {
      * 获取列宽度
      */
     this.getColWidth = function(x) {
-        return _colWidth[x] || _cellDefaultWidth;
+        return _colWidth[x] || global_config.cell_default_width;
     }
 
     /**
      * 获取行高度
      */
     this.getRowHeight = function(y) {
-        return _rowHeight[y] || _cellDefaultHeight;
+        return _rowHeight[y] || global_config.cell_default_height;
     }
 
     Object.defineProperties(this, {
@@ -823,8 +822,8 @@ function Spread(config, pNode) {
      * 初始化
      */
     (() => {
-        _colWidth = new Array(this.rowNum).fill(_cellDefaultWidth);
-        _rowHeight = new Array(this.colNum).fill(_cellDefaultHeight);
+        _colWidth = new Array(this.rowNum).fill(global_config.cell_default_width);
+        _rowHeight = new Array(this.colNum).fill(global_config.cell_default_height);
         this.viewCell = new Array(this.rowNum).fill(null).map(i => []).map(i => new Array(this.colNum).fill('').map(i => []));
     })();
 
@@ -835,64 +834,3 @@ function Spread(config, pNode) {
         }
     }
 }
-
-console.time('页面加载');
-
-let spread = new Spread();
-spreadEl = spread.render(document.body);
-
-let menu = new ContextMenu({
-    menus: [
-        {
-            text: '复制',
-            key: 'ctrl+c',
-            onInit(e) {
-
-            },
-            onClick(e) {
-
-            }
-        }, {
-            text: '合并单元格',
-            key: 'ctrl+m',
-            onInit(e) {
-                return {
-                    hidden: spread.selected.length <= 1 || spread.selectedArea.type !== 'cell'
-                }
-            },
-            onClick(e) {
-                spread.setMerge(
-                    spread.selectedArea.minx,
-                    spread.selectedArea.miny,
-                    spread.selectedArea.maxx - spread.selectedArea.minx + 1,
-                    spread.selectedArea.maxy - spread.selectedArea.miny + 1
-                );
-            }
-        }, {
-            text: '拆分单元格',
-            key: 'ctrl+m',
-            onInit(e) {
-                return {
-                    hidden: true
-                }
-            },
-            onClick(e) {
-                if(e && e.data) {
-                    console.log(e);
-                }
-            }
-        }
-    ]
-}, spreadEl);
-
-window.spread = spread;
-spreadEl.classList.add('init');
-setTimeout(() => {
-    spreadEl.classList.add('animeinit');
-}, 200);
-
-document.oncontextmenu = function(ev) {
-    return false;    //屏蔽右键菜单
-}
-
-console.timeEnd('页面加载');

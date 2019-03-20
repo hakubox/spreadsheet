@@ -1,4 +1,4 @@
-function Input(config, pNode) {
+export function Input(config, pNode) {
 
     if(pNode) {
         this.el = this.render(pNode);
@@ -8,7 +8,7 @@ function Input(config, pNode) {
     }
 }
 
-function TextBox(config, pNode) {
+export function TextBox(config, pNode) {
     this.el = null;
     // this.call(new Input(config));
 
@@ -26,7 +26,6 @@ function TextBox(config, pNode) {
 
         if(config.spread.active[0] === config.rowIndex + config.spread.viewX && config.spread.active[1] === config.colIndex) {
             el = document.createElement("textarea");
-            el.type = "text";
             el.classList.add("data-txt-input");
             el.onkeydown = this.onKeyPress;
         } else {
@@ -60,7 +59,7 @@ function TextBox(config, pNode) {
 /**
  * @class 单元格
  */
-function Cell(config, pNode) {
+export function Cell(config, pNode) {
     this.el = null;
     this.data = config;
     this.isEdit = false;
@@ -372,7 +371,7 @@ Cell.prototype.onMouseOut = function() {
 /**
  * @class 行
  */
-function Row(config, pNode) {
+export function Row(config, pNode) {
 
     this.render = function(parentNode) {
         let el = document.createElement("tr");
@@ -404,7 +403,7 @@ function Row(config, pNode) {
 /**
  * @class 表格
  */
-function Table(config, pNode) {
+export function Table(config, pNode) {
     this.el = null;
 
     this.refresh = function() {

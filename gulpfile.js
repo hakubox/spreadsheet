@@ -12,6 +12,7 @@ let gulp = require('gulp'),
 
 //sass生成css文件
 gulp.task('sass', function(){
+    console.log('生成SASS');
     return gulp.src('src/scss/**/*.+(scss|sass)')
         .pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
@@ -60,9 +61,8 @@ gulp.task('browserSync', function() {
 //生成发布文件并监听
 gulp.task('watch', gulp.series('sass', 'browserSync', function(){
     gulp.watch('src/*.html').on('change', browserSync.reload);
-    gulp.watch('src/scss/*.+(scss|sass)').on('change', ['sass']);
-    gulp.watch('src/components/*.js').on('change', browserSync.reload);
-    gulp.watch('src/js/*.js').on('change', browserSync.reload);
+    gulp.watch('src/scss/*.scss').on('change', [`sass`, browserSync.reload]);
+    gulp.watch('src/js/**/*.js').on('change', browserSync.reload);
 }));
 
 //生成最终发布文件

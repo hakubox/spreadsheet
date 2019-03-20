@@ -2,7 +2,7 @@
 /**
  * 右键菜单项
  */
-function ContextMenuItem(config, pNode) {
+export function ContextMenuItem(config, pNode) {
     this.el = null;
     this.txtEl = null;
     this.data = config;
@@ -50,10 +50,10 @@ function ContextMenuItem(config, pNode) {
 /**
  * 右键菜单
  */
-function ContextMenu(config, pNode) {
+export function ContextMenu(config, pNode) {
     this.el = null;
     this.data = {
-        ...config, 
+        ...config,
         menuEls: []
     };
 

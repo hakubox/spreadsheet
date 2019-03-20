@@ -16,7 +16,7 @@ function numToString(numm) {
 /**
  * 表格表头单元格
  */
-function HeaderCell(config, pNode) {
+export function HeaderCell(config, pNode) {
     this.el = null;
     this.txtEl = null;
 
@@ -84,7 +84,7 @@ function HeaderCell(config, pNode) {
 /**
  * 表格表头
  */
-function HeaderList(config, pNode) {
+export function HeaderList(config, pNode) {
 
     this.data = [];
 
