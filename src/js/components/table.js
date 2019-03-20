@@ -210,29 +210,6 @@ Cell.prototype.refresh = function() {
             _class.push('selected-area-init');
         }
 
-        // //设置当前拖拽范围
-        // if(this.data.spread.dragger.isStart) {
-        //     if (rowIndex == this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
-        //         colIndex >= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
-        //         colIndex <= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy) {
-        //         _class.push('drag-area-top');
-        //     }
-        //     if (rowIndex == this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx &&
-        //         colIndex >= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
-        //         colIndex <= this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy) {
-        //         _class.push('drag-area-bottom');
-        //     }
-        //     if (colIndex == this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny &&
-        //         rowIndex >= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
-        //         rowIndex <= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx) {
-        //         _class.push('drag-area-left');
-        //     }
-        //     if (colIndex == this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.maxy &&
-        //         rowIndex >= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx &&
-        //         rowIndex <= this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.maxx) {
-        //         _class.push('drag-area-right');
-        //     }
-        // }
         if(this.data.spread.dragger.isStart) {
             let _topIndex = this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx,
                 _leftIndex = this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny;
@@ -241,9 +218,14 @@ Cell.prototype.refresh = function() {
                 _left = Array(_leftIndex).fill('').map((i, index) => this.data.spread.getColWidth(index + _leftIndex)).reduce((a, b) => a + b),
                 _width = Array(this.data.spread.selectedArea.maxy + 1).slice(this.data.spread.selectedArea.miny).fill('').map((i, index) => this.data.spread.getColWidth(index + this.data.spread.selectedArea.miny)).reduce((a, b) => a + b);
             // console.log(_top, _height, _left, _width);
-            this.data.spread.dragger.el.style.transform = 'translate(' + _left + 'px,' + _top + 'px)';
-            this.data.spread.dragger.el.style.width = _width + 'px';
-            this.data.spread.dragger.el.style.height = _height + 'px';
+            this.data.spread.setDraggerArea({
+                top: _top,
+                left: _left,
+                width: _width,
+                height: _height
+            });
+        } else {
+            // this.data.spread.setDraggerArea({});
         }
 
         //设置当前范围

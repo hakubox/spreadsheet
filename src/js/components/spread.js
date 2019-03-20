@@ -264,7 +264,18 @@ export function Spread(config, pNode) {
         y: 0,
         x2: 0,
         y2: 0
-    }
+    };
+    this.setDraggerArea = function({top, left, width, height}) {
+        if(this.dragger.isStart) {
+            this.dragger.el.style.display = 'block';
+            if(width) this.dragger.el.style.width = width + 'px';
+            if(height) this.dragger.el.style.height = height + 'px';
+
+            if(left && top) this.dragger.el.style.transform = 'translate(' + left + 'px,' + top + 'px)';
+        } else {
+            this.dragger.el.style.display = 'none';
+        }
+    };
     this.table = null;
 
     //设置值
@@ -754,6 +765,7 @@ export function Spread(config, pNode) {
             this.selectedArea.isStart = false;
             this.dragger.isStart = false;
             this.scroll.isStart = false;
+            this.setDraggerArea({});
         });
         //滚轮滚动
         el.addEventListener('wheel', e => {

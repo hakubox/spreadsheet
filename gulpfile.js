@@ -11,8 +11,7 @@ let gulp = require('gulp'),
     sourcemaps  = require('gulp-sourcemaps');
 
 //sass生成css文件
-gulp.task('sass', function(){
-    console.log('生成SASS');
+gulp.task('sass', function() {
     return gulp.src('src/scss/**/*.+(scss|sass)')
         .pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
@@ -59,9 +58,15 @@ gulp.task('browserSync', function() {
 })
 
 //生成发布文件并监听
-gulp.task('watch', gulp.series('sass', 'browserSync', function(){
+gulp.task('watch', gulp.series('sass', function() {
+    browserSync.init({
+        server: {
+            baseDir: "./src"
+        },
+        files:['**'],
+    })
     gulp.watch('src/*.html').on('change', browserSync.reload);
-    gulp.watch('src/scss/*.scss').on('change', [`sass`, browserSync.reload]);
+    gulp.watch('src/scss/*.scss').on('change', gulp.series(`sass`, browserSync.reload));
     gulp.watch('src/js/**/*.js').on('change', browserSync.reload);
 }));
 
