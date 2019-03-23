@@ -1,17 +1,4 @@
-function numToString(numm) {
-    var stringArray = [];
-    var numToStringAction = function (nnum) {
-        var num = nnum - 1;
-        var a = parseInt(num / 26);
-        var b = num % 26;
-        stringArray.push(String.fromCharCode(64 + parseInt(b + 1)));
-        if (a > 0) {
-            numToStringAction(a);
-        }
-    }
-    numToStringAction(numm);
-    return stringArray.reverse().join("");
-}
+import tool from '../tools.js';
 
 /**
  * 表格表头单元格
@@ -42,7 +29,7 @@ export function HeaderCell(config, pNode) {
 
     //设置展示下标
     this.setIndex = function(index) {
-        (this.txtEl || this).innerHTML = config.headertype === 'top' ? numToString(index) : index;
+        (this.txtEl || this).innerHTML = config.headertype === 'top' ? tool.numToString(index) : index;
     }
 
     //更新状态

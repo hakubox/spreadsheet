@@ -1,3 +1,5 @@
+import tool from '../tools.js';
+
 export function Input(config, pNode) {
 
     if(pNode) {
@@ -63,6 +65,7 @@ export function Cell(config, pNode) {
     this.el = null;
     this.data = config;
     this.isEdit = false;
+    this.content = null;
     this.selected = {
         top: false,
         botom: false,
@@ -81,7 +84,7 @@ export function Cell(config, pNode) {
         el.addEventListener('mouseout', this.onMouseOut.bind(this));
 
         // let
-        this.Content = new TextBox({
+        this.content = new TextBox({
             ...config,
             component: 'TextBox'
         }, el);
@@ -174,18 +177,18 @@ Cell.prototype.refresh = function() {
     if(this.data.spread.active[0] === rowIndex && this.data.spread.active[1] === colIndex) {
         _class.push('focus');
         if(this.isEdit === false) {
-            this.el.removeChild(this.Content.el);
-            this.el.appendChild(this.Content.render(this.Content.el));
-            this.Content.el.value = this.data.spread.getData(rowIndex, colIndex);
-            setTimeout(() => this.Content.el.focus(), 1);
+            this.el.removeChild(this.content.el);
+            this.el.appendChild(this.content.render(this.content.el));
+            this.content.el.value = this.data.spread.getData(rowIndex, colIndex);
+            setTimeout(() => this.content.el.focus(), 1);
             this.isEdit = true;
         }
     } else {
         if(this.isEdit === true) {
-            this.el.removeChild(this.Content.el);
-            this.el.appendChild(this.Content.render(this.Content.el));
-            this.Content.el.innerHTML = this.data.spread.getData(rowIndex, colIndex);
-            this.Content.el.focus();
+            this.el.removeChild(this.content.el);
+            this.el.appendChild(this.content.render(this.content.el));
+            this.content.el.innerHTML = this.data.spread.getData(rowIndex, colIndex);
+            this.content.el.focus();
             this.isEdit = false;
         }
         //选中单元格
@@ -213,19 +216,25 @@ Cell.prototype.refresh = function() {
         if(this.data.spread.dragger.isStart) {
             let _topIndex = this.data.spread.dragger.x2 - this.data.spread.dragger.x + this.data.spread.selectedArea.minx,
                 _leftIndex = this.data.spread.dragger.y2 - this.data.spread.dragger.y + this.data.spread.selectedArea.miny;
-            let _top = Array(_topIndex).fill('').map((i, index) => this.data.spread.getRowHeight(index + _topIndex)).reduce((a, b) => a + b),
-                _height = Array(this.data.spread.selectedArea.maxx + 1).slice(this.data.spread.selectedArea.minx).fill('').map((i, index) => this.data.spread.getRowHeight(index + this.data.spread.selectedArea.minx)).reduce((a, b) => a + b),
-                _left = Array(_leftIndex).fill('').map((i, index) => this.data.spread.getColWidth(index + _leftIndex)).reduce((a, b) => a + b),
-                _width = Array(this.data.spread.selectedArea.maxy + 1).slice(this.data.spread.selectedArea.miny).fill('').map((i, index) => this.data.spread.getColWidth(index + this.data.spread.selectedArea.miny)).reduce((a, b) => a + b);
-            // console.log(_top, _height, _left, _width);
-            this.data.spread.setDraggerArea({
-                top: _top,
-                left: _left,
-                width: _width,
-                height: _height
-            });
-        } else {
-            // this.data.spread.setDraggerArea({});
+            // console.log(_topIndex,this.data.spread.selectedArea.rowIndex );
+            if(_topIndex >= 0 && _leftIndex >= 0 &&
+                !(_topIndex == this.data.spread.selectedArea.rowIndex &&
+                _leftIndex == this.data.spread.selectedArea.colIndex)
+            ) {
+                let _top = Array(_topIndex).fill('').map((i, index) => this.data.spread.getRowHeight(index + _topIndex)).concat([0, 0]).reduce((a, b) => a + b),
+                    _height = Array(this.data.spread.selectedArea.maxx + 1).slice(this.data.spread.selectedArea.minx).fill('').map((i, index) => this.data.spread.getRowHeight(index + this.data.spread.selectedArea.minx)).concat([0, 0]).reduce((a, b) => a + b),
+                    _left = Array(_leftIndex).fill('').map((i, index) => this.data.spread.getColWidth(index + _leftIndex)).concat([0, 0]).reduce((a, b) => a + b),
+                    _width = Array(this.data.spread.selectedArea.maxy + 1).slice(this.data.spread.selectedArea.miny).fill('').map((i, index) => this.data.spread.getColWidth(index + this.data.spread.selectedArea.miny)).concat([0, 0]).reduce((a, b) => a + b);
+                // console.log(_top, _height, _left, _width);
+                this.data.spread.setDraggerArea({
+                    top: _top,
+                    left: _left,
+                    width: _width,
+                    height: _height,
+                    rowIndex: _topIndex,
+                    colIndex: _leftIndex
+                });
+            }
         }
 
         //设置当前范围
@@ -310,6 +319,10 @@ Cell.prototype.onMouseDown = function(e) {
         this.data.spread.dragger.isStart = true;
         this.data.spread.dragger.x = e.target.data.rowIndex;
         this.data.spread.dragger.y = e.target.data.colIndex;
+        this.data.spread.dragger.x2 = this.data.spread.dragger.x;
+        this.data.spread.dragger.y2 = this.data.spread.dragger.y;
+        this.data.spread.dragger.rowIndex = e.target.data.rowIndex;
+        this.data.spread.dragger.colIndex = e.target.data.colIndex;
     } else {
         this.data.spread.dragger.isStart = false;
     }

@@ -2,6 +2,7 @@ import { HeaderList } from './header.js'
 import { Table } from './table.js'
 import { Scroll } from './scroll.js'
 import { global_config } from './../config.js'
+import tool from '../tools.js';
 
 /**
  * @class 表格页
@@ -192,6 +193,12 @@ export function Spread(config, pNode) {
                 this.y2 = value;
             }
         },
+        get rownum() {
+            return this.maxx - this.minx
+        },
+        get colnum() {
+            return this.maxy - this.miny
+        },
         isStart: false,
         isActive: false,
         type: 'cell'
@@ -263,15 +270,19 @@ export function Spread(config, pNode) {
         x: 0,
         y: 0,
         x2: 0,
-        y2: 0
+        y2: 0,
+        rowIndex: 0,
+        colIndex: 0
     };
-    this.setDraggerArea = function({top, left, width, height}) {
+    this.setDraggerArea = function({top, left, width, height, rowIndex, colIndex}) {
         if(this.dragger.isStart) {
             this.dragger.el.style.display = 'block';
             if(width) this.dragger.el.style.width = width + 'px';
             if(height) this.dragger.el.style.height = height + 'px';
 
             if(left && top) this.dragger.el.style.transform = 'translate(' + left + 'px,' + top + 'px)';
+            if(rowIndex) this.dragger.rowIndex = rowIndex;
+            if(colIndex) this.dragger.colIndex = colIndex;
         } else {
             this.dragger.el.style.display = 'none';
         }
@@ -284,7 +295,12 @@ export function Spread(config, pNode) {
             this.viewData[x] = [];
         }
         this.viewData[x][y] = value;
-        this.viewCell[x - this.viewX][y - this.viewY].el.value = value;
+        let cell = this.viewCell[x - this.viewX][y - this.viewY];
+        if(cell.isEdit) {
+            cell.content.el.value = value;
+        } else {
+            cell.content.el.innerHTML = value;
+        }
     }
 
     //获取值
@@ -415,13 +431,16 @@ export function Spread(config, pNode) {
     }
 
     this.render = function(parentNode) {
-        let el = document.createElement("div");
-        el.classList.add('haku-spreadsheet');
+
+        let el = tool.createDom('div', {
+            className: 'haku-spreadsheet'
+        });
         //el.data = config;
 
         //构造左侧头部
-        let headerbodyleft = document.createElement("div");
-        headerbodyleft.classList.add('header-body-left');
+        let headerbodyleft = tool.createDom('div', {
+            className: 'header-body-left'
+        });
         let leftHeader = new HeaderList({
             ...config,
             spread: this,
@@ -435,8 +454,9 @@ export function Spread(config, pNode) {
         el.appendChild(headerbodyleft);
 
         //构造顶部头部
-        let headerbodytop = document.createElement("div");
-        headerbodytop.classList.add('header-body-top');
+        let headerbodytop = tool.createDom('div', {
+            className: 'header-body-top'
+        });
         let topHeader = new HeaderList({
             ...config,
             spread: this,
@@ -450,9 +470,10 @@ export function Spread(config, pNode) {
         el.appendChild(headerbodytop);
 
         //构造表格
-        let fixedMain = document.createElement("div");
+        let fixedMain = tool.createDom('div', {
+            className: 'haku-spreadsheet-main'
+        });
         this.panels.main = fixedMain;
-        fixedMain.classList.add('haku-spreadsheet-main');
 
         //拖拽区域框
         let dragArea = document.createElement("div");
@@ -763,7 +784,35 @@ export function Spread(config, pNode) {
         });
         document.body.addEventListener('mouseup', e => {
             this.selectedArea.isStart = false;
-            this.dragger.isStart = false;
+            //拖拽
+            if(this.dragger.isStart) {
+                this.dragger.isStart = false;
+                if((this.dragger.rowIndex != this.selectedArea.minx || this.dragger.colIndex != this.selectedArea.miny) &&
+                    (this.dragger.x != this.dragger.x2 || this.dragger.y != this.dragger.y2)
+                ) {
+                    console.log(this.dragger.x, this.dragger.x2, this.dragger.y, this.dragger.y2);
+                    let _moveArr = [];
+                    for(let i = this.selectedArea.minx; i <= this.selectedArea.maxx; i++) {
+                        for (let o = this.selectedArea.miny; o <= this.selectedArea.maxy; o++) {
+                            _moveArr.push({
+                                x: i - this.selectedArea.minx + this.dragger.rowIndex,
+                                y: o - this.selectedArea.miny + this.dragger.colIndex,
+                                value: this.getData(i, o)
+                            });
+                            this.setData(i, o);
+                        }
+                    }
+                    _moveArr.forEach(i => this.setData(i.x, i.y, i.value));
+                    this.selected = _moveArr.map(i => ([i.x, i.y])) || [];
+                    this.selectedArea.x2 = this.dragger.rowIndex + this.selectedArea.rownum;
+                    this.selectedArea.y2 = this.dragger.colIndex + this.selectedArea.colnum;
+                    this.selectedArea.x = this.dragger.rowIndex;
+                    this.selectedArea.y = this.dragger.colIndex;
+                    this.refreshSelected();
+                    this.header.top.refresh();
+                    this.header.left.refresh();
+                }
+            }
             this.scroll.isStart = false;
             this.setDraggerArea({});
         });
@@ -800,9 +849,9 @@ export function Spread(config, pNode) {
                         _y += this.viewY;
                     }
                     if(this.viewData[_x] && this.viewData[_x][_y]) {
-                        this.viewCell[x][y].Content.el.innerHTML = this.viewData[_x][_y];
+                        this.viewCell[x][y].content.el.innerHTML = this.viewData[_x][_y];
                     } else {
-                        this.viewCell[x][y].Content.el.innerHTML = "";
+                        this.viewCell[x][y].content.el.innerHTML = "";
                     }
                 }
             }

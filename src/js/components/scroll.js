@@ -71,6 +71,10 @@ export function Scroll(config, pNode) {
             this.value = _scrollWidth * config.spread.viewY / config.spread.maxColCount;
             this.scrollBar.el.style.transform = 'translateX(' + this.value + 'px)';
         }
+        config.spread.refreshSelected();
+        config.spread.refreshMerge();
+        config.spread.header.top.refresh();
+        config.spread.header.left.refresh();
     }
 
     this.render = function(parentNode) {
