@@ -86,9 +86,11 @@ export function Cell(config, pNode) {
         if(this.data.colIndex === 0) {
             el.style.height = this.data.spread.getRowHeight(this.data.rowIndex) + 'px';
         }
+        el.style.maxHeight = this.data.spread.getRowHeight(this.data.rowIndex) + 'px';
         if(this.data.rowIndex === 0) {
             el.style.width = this.data.spread.getColWidth(this.data.colIndex) + 'px';
         }
+        el.style.maxWidth = this.data.spread.getColWidth(this.data.colIndex) + 'px';
 
         // let
         this.content = new TextBox({

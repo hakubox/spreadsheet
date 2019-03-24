@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,12 +14,13 @@
     <link rel="stylesheet" href="css/fontawesome.css">
 </head>
 <body>
+    <input id="fileSpreadSheet" type="file" />
     <!-- build:js js/index.min.js -->
     <script type="module" src="js/index.js"></script>
     <!-- endbuild -->
+    <script async="async" src="lib/xlsx/jszip.js"></script>
     <script async="async" src="lib/xlsx/cpexcel.js"></script>
     <script async="async" src="lib/xlsx/shim.js"></script>
-    <script async="async" src="lib/xlsx/jszip.js"></script>
     <script async="async" src="lib/xlsx/xlsx.js"></script>
 </body>
 </html>

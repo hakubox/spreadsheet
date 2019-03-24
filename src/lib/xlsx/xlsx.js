@@ -7225,7 +7225,7 @@ var ETH = (function() {
 			if(record[0] !== 'cell') continue;
 			var addr = decode_cell(record[1]);
 			if(arr.length <= addr.r) for(R = arr.length; R <= addr.r; ++R) if(!arr[R]) arr[R] = [];
-			R = addr.r; C = addr.c;
+            R = addr.r; C = addr.c;
 			switch(record[2]) {
 				case 't': arr[R][C] = decode(record[3]); break;
 				case 'v': arr[R][C] = +record[3]; break;
@@ -7269,13 +7269,13 @@ var ETH = (function() {
 		if(!ws || !ws['!ref']) return "";
 		var o = [], oo = [], cell, coord = "";
 		var r = decode_range(ws['!ref']);
-		var dense = Array.isArray(ws);
+        var dense = Array.isArray(ws);
 		for(var R = r.s.r; R <= r.e.r; ++R) {
 			for(var C = r.s.c; C <= r.e.c; ++C) {
 				coord = encode_cell({r:R,c:C});
 				cell = dense ? (ws[R]||[])[C] : ws[coord];
 				if(!cell || cell.v == null || cell.t === 'z') continue;
-				oo = ["cell", coord, 't'];
+                oo = ["cell", coord, 't'];
 				switch(cell.t) {
 					case 's': case 'str': oo.push(encode(cell.v)); break;
 					case 'n':
@@ -7887,7 +7887,7 @@ var parse_rs = (function parse_rs_factory() {
 				case '</outline>': break;
 
 				/* 18.4.5 rFont CT_FontName */
-				case '<rFont': font.name = y.val; break;
+				case '<rFont': font.name = utf8read(y.val); break;
 
 				/* 18.4.11 sz CT_FontSize */
 				case '<sz': font.sz = y.val; break;
@@ -8754,7 +8754,7 @@ function parse_fonts(t, styles, themes, opts) {
 				break;
 
 			/* 18.8.29 name CT_FontName */
-			case '<name': if(y.val) font.name = y.val; break;
+            case '<name': if(y.val) font.name = utf8read(y.val); break;
 			case '<name/>': case '</name>': break;
 
 			/* 18.8.2  b CT_BooleanProperty */
@@ -12852,7 +12852,7 @@ function parse_ws_xml(data, opts, idx, rels, wb, themes, styles) {
 	var hlink = data2.match(hlinkregex);
 	if(hlink) parse_ws_xml_hlinks(s, hlink, rels);
 
-	/* 18.3.1.62 pageMargins CT_PageMargins */
+    /* 18.3.1.62 pageMargins CT_PageMargins */
 	var margins = data2.match(marginregex);
 	if(margins) s['!margins'] = parse_ws_xml_margins(parsexmltag(margins[0]));
 
@@ -13139,8 +13139,9 @@ return function parse_ws_xml_data(sdata, s, opts, guess, themes, styles) {
 					if(_tag.r >= arrayf[i][0].s.r && _tag.r <= arrayf[i][0].e.r)
 						if(_tag.c >= arrayf[i][0].s.c && _tag.c <= arrayf[i][0].e.c)
 							p.F = arrayf[i][1];
-			}
-
+            }
+            // TODO: 添加 可能是样式
+            if(tag.s) p._s = tag.s;
 			if(tag.t == null && p.v === undefined) {
 				if(p.f || p.F) {
 					p.v = 0; p.t = "n";
@@ -13935,7 +13936,7 @@ function parse_ws_bin(data, _opts, idx, rels, wb, themes, styles) {
 				s['!autofilter'] = { ref:encode_range(val) };
 				break;
 
-			case 0x01DC: /* 'BrtMargins' */
+            case 0x01DC: /* 'BrtMargins' */
 				s['!margins'] = val;
 				break;
 

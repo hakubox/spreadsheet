@@ -4,6 +4,11 @@ body {
     margin: 0px;
 }
 
+//上传文件的input
+#fileSpreadSheet {
+    display: none;
+}
+
 .haku-spreadsheet {
     position: relative;
     width: 100vw;
@@ -193,6 +198,8 @@ body {
                 user-select: none;
                 -moz-user-select: none;
                 cursor: cell;
+                overflow: hidden;
+                text-overflow: ellipsis;
 
                 &.cell-freeze-left {
                     border-left: 1px solid #888;

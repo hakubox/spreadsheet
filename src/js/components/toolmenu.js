@@ -43,7 +43,6 @@ export function ToolMenuItem(config, pNode) {
             config.menu.onClick && el.addEventListener('mousedown', e => {
                 if(e.buttons === 1) {
                     config.menu.onClick.call(this, e);
-                    this.data.hide();
                 }
             });
         }

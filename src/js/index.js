@@ -1,14 +1,108 @@
 import { ContextMenu } from './components/contextmenu.js'
 import { ToolMenu } from './components/toolmenu.js'
 import { Spread } from './components/spread.js'
+import tool from './tools.js';
 
 
-console.time('页面加载');
+let fileSpreadSheet = document.querySelector('#fileSpreadSheet');
+
+function fileImport() {
+    //获取读取我文件的File对象
+    var selectedFile = fileSpreadSheet.files[0];
+    var name = selectedFile.name;//读取选中文件的文件名
+    var size = selectedFile.size;//读取选中文件的大小
+    console.log("文件名:"+name+"大小:"+size);
+
+    var reader = new FileReader();//这是核心,读取操作就是由它完成.
+    reader.readAsBinaryString(selectedFile);//读取文件的内容,也可以读取文件的URL
+    reader.onload = ev => {
+        let data = ev.target.result,
+            workbook = XLSX.read(data, {
+                type: 'binary',
+                cellStyles: true,
+                // bookProps: true,
+                bookFiles: true,
+                bookVBA: true
+            }), // 以二进制流方式读取得到整份excel表格对象
+            persons = []; // 存储获取到的数据
+        // 遍历每张表读取
+        let fromTo = '';
+        for (let sheet in workbook.Sheets) {
+            if (workbook.Sheets.hasOwnProperty(sheet)) {
+                fromTo = workbook.Sheets[sheet]['!ref'];
+                persons = persons.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]));
+                console.log(workbook, persons, fromTo);
+
+                //获取数据
+                Object.entries(workbook.Sheets[sheet]).forEach(([key, value]) => {
+                    if(key[0] !== '!') {
+                        let colNo = key.match(/[A-Z]+/g)[0];
+                        let rowNum = tool.stringToNum(colNo) - 1,
+                            colNum = Number(key.substr(colNo.length)) - 1;
+                        spread.setData(colNum, rowNum, value.w);
+                        if(value._s && !isNaN(value._s)) {
+                            let cellXf = workbook.Styles.CellXf[Number(value._s)];
+                            let currentFill = workbook.Styles.Fills[cellXf.fillId];
+                            let currentFont = workbook.Styles.Fonts[cellXf.fontId];
+                            let fontColor = '#000000', backColor = '#FFFFFF';
+                            if(currentFill.fgColor) {
+                                if(currentFill.fgColor.rgb) {
+                                    backColor = currentFill.fgColor.rgb;
+                                } else if(currentFill.fgColor.theme !== undefined) {
+                                    backColor = workbook.Themes.themeElements.clrScheme[currentFill.fgColor.theme].rgb;
+                                }
+                                if(backColor == 'FFFFFF') backColor = '000000';
+                                else if(backColor == '000000') backColor = 'FFFFFF';
+                                if(currentFill.fgColor.tint) {
+                                    backColor = Math.floor(Number('0x' + backColor[0] + backColor[1]) * (1 + currentFill.fgColor.tint)).toString(16).padStart(2, '0') +
+                                                Math.floor(Number('0x' + backColor[2] + backColor[3]) * (1 + currentFill.fgColor.tint)).toString(16).padStart(2, '0') +
+                                                Math.floor(Number('0x' + backColor[4] + backColor[5]) * (1 + currentFill.fgColor.tint)).toString(16).padStart(2, '0');
+                                }
+                                backColor = '#' + backColor;
+                            }
+                            if(currentFont.color) {
+                                if(currentFont.color.rgb) {
+                                    fontColor = currentFont.color.rgb;
+                                } else if(currentFont.color.theme !== undefined) {
+                                    fontColor = workbook.Themes.themeElements.clrScheme[currentFont.color.theme].rgb;
+                                }
+                                if(fontColor == 'FFFFFF') fontColor = '000000';
+                                else if(fontColor == '000000') fontColor = 'FFFFFF';
+                                fontColor = '#' + fontColor;
+                            }
+                            spread.setStyle(colNum, rowNum, {
+                                color: fontColor,
+                                backgroundColor: backColor
+                            })
+                        }
+                    }
+                });
+
+
+                fileSpreadSheet.value = '';
+                break;
+            }
+        }
+
+    }
+}
+
+fileSpreadSheet.addEventListener('change', fileImport);
 
 //顶部工具栏
 let toolmenu = new ToolMenu({
     menus: [
         {
+            text: '打开',
+            key: 'ctrl+c',
+            icon: 'fal fa-fw fa-file-excel',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+                document.querySelector('#fileSpreadSheet').click();
+            }
+        }, '|', {
             text: '撤销',
             key: 'ctrl+c',
             icon: 'fal fa-fw fa-reply',
@@ -64,7 +158,7 @@ let toolmenu = new ToolMenu({
 
             }
         }, {
-            text: '字体色',
+            text: '字体颜色',
             icon: 'fal fa-fw fa-font',
             get isDisabled() {
 
@@ -73,7 +167,7 @@ let toolmenu = new ToolMenu({
 
             }
         }, {
-            text: '背景色',
+            text: '填充颜色',
             icon: 'fal fa-fw fa-fill-drip',
             get isDisabled() {
 
@@ -216,5 +310,3 @@ setTimeout(() => {
 document.oncontextmenu = function(ev) {
     return false;    //屏蔽右键菜单
 }
-
-console.timeEnd('页面加载');

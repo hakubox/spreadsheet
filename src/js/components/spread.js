@@ -232,7 +232,7 @@ export function Spread(config, pNode) {
      * 单元格合并区域
      */
     this.areaMerge = [
-        [3, 3, 2, 4]
+        // [3, 3, 2, 4]
     ];
     /**
      * 合并后隐藏区域（在合并区域调整后初始化
@@ -296,11 +296,20 @@ export function Spread(config, pNode) {
         }
         this.viewData[x][y] = value;
         let cell = this.viewCell[x - this.viewX][y - this.viewY];
-        if(cell.isEdit) {
-            cell.content.el.value = value;
-        } else {
-            cell.content.el.innerHTML = value;
+        if(cell) {
+            if(cell.isEdit) {
+                cell.content.el.value = value;
+            } else {
+                cell.content.el.innerHTML = value;
+            }
         }
+    }
+
+    //设置单元格样式
+    this.setStyle = function(x, y, style) {
+        Object.entries(style).forEach(([key, value]) => {
+            this.viewCell[x][y].el.style[key] = value;
+        });
     }
 
     //获取值
