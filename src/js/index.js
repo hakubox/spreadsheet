@@ -1,13 +1,169 @@
 import { ContextMenu } from './components/contextmenu.js'
+import { ToolMenu } from './components/toolmenu.js'
 import { Spread } from './components/spread.js'
 
 
 console.time('页面加载');
 
+//顶部工具栏
+let toolmenu = new ToolMenu({
+    menus: [
+        {
+            text: '撤销',
+            key: 'ctrl+c',
+            icon: 'fal fa-fw fa-reply',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }, {
+            text: '重做',
+            key: 'ctrl+m',
+            icon: 'fal fa-fw fa-share',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+            }
+        }, '|', {
+            text: '格式刷',
+            icon: 'fal fa-fw fa-eraser',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }, '|', {
+            text: '加粗',
+            icon: 'fal fa-fw fa-bold',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }, {
+            text: '倾斜',
+            icon: 'fal fa-fw fa-italic',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }, {
+            text: '下划线',
+            icon: 'fal fa-fw fa-underline',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }, {
+            text: '字体色',
+            icon: 'fal fa-fw fa-font',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }, {
+            text: '背景色',
+            icon: 'fal fa-fw fa-fill-drip',
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }, '|', {
+            text: '左对齐',
+            icon: 'fal fa-fw fa-align-left',
+            children: [
+                {
+                    text: '居中对齐',
+                    icon: 'fal fa-fw fa-align-center',
+                    children: [
+
+                    ],
+                    get isDisabled() {
+
+                    },
+                    onClick(e) {
+
+                    }
+                }, {
+                    text: '右对齐',
+                    icon: 'fal fa-fw fa-align-right',
+                    children: [
+
+                    ],
+                    get isDisabled() {
+
+                    },
+                    onClick(e) {
+
+                    }
+                }
+            ],
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }, {
+            text: '上对齐',
+            icon: 'fal fa-fw fa-grip-lines-top',
+            children: [
+                {
+                    text: '居中对齐',
+                    icon: 'fal fa-fw fa-align-center',
+                    children: [
+
+                    ],
+                    get isDisabled() {
+
+                    },
+                    onClick(e) {
+
+                    }
+                }, {
+                    text: '右对齐',
+                    icon: 'fal fa-fw fa-align-right',
+                    children: [
+
+                    ],
+                    get isDisabled() {
+
+                    },
+                    onClick(e) {
+
+                    }
+                }
+            ],
+            get isDisabled() {
+
+            },
+            onClick(e) {
+
+            }
+        }
+
+
+    ]
+}, document.body);
+
 let spread = new Spread();
 let spreadEl = spread.render(document.body);
 
-let menu = new ContextMenu({
+//右键菜单列表
+let contextmenu = new ContextMenu({
     menus: [
         {
             text: '复制',

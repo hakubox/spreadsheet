@@ -492,9 +492,10 @@ export function Spread(config, pNode) {
             rowNum: this.rowNum,
             colNum: this.colNum,
             onInit() {
-                this.classList.add('haku-table', 'haku-table-main');
+
             }
         }, fixedMainBody);
+        tableMain.el.classList.add('haku-table', 'haku-table-main');
         this.table = tableMain;
 
         fixedMain.appendChild(fixedMainBody);

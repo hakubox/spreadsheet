@@ -83,6 +83,13 @@ export function Cell(config, pNode) {
         el.addEventListener('mousemove', this.onMouseMove.bind(this));
         el.addEventListener('mouseout', this.onMouseOut.bind(this));
 
+        if(this.data.colIndex === 0) {
+            el.style.height = this.data.spread.getRowHeight(this.data.rowIndex) + 'px';
+        }
+        if(this.data.rowIndex === 0) {
+            el.style.width = this.data.spread.getColWidth(this.data.colIndex) + 'px';
+        }
+
         // let
         this.content = new TextBox({
             ...config,
@@ -114,10 +121,10 @@ Cell.prototype.refreshMerge = function() {
     );
 
     if(this.data.colIndex === 0) {
-        this.el.parentNode.style.height = this.data.spread.getRowHeight(this.data.rowIndex) + 'px';
+        this.el.style.height = this.data.spread.getRowHeight(this.data.rowIndex) + 'px';
     }
     if(this.data.rowIndex === 0) {
-        this.el.parentNode.style.width = this.data.spread.getColWidth(this.data.colIndex) + 'px';
+        this.el.style.width = this.data.spread.getColWidth(this.data.colIndex) + 'px';
     }
 
     if(mergeinfo) {

@@ -1,0 +1,56 @@
+@import 'variables.scss';
+
+@import "./../lib/fontawesome/scss/fontawesome.scss";
+@import "./../lib/fontawesome/scss/light.scss";
+
+.user {
+    @extend %fa-icon;
+    @extend .fas;
+
+    &:before {
+        content: fa-content($fa-var-user);
+    }
+}
+
+.twitter {
+    @extend %fa-icon;
+    @extend .fab;
+
+    &:before {
+        content: fa-content($fa-var-twitter);
+    }
+}
+
+.fa-grip-lines-top {
+    @extend %fa-icon;
+    @extend .fal;
+
+    vertical-align: top;
+
+    &:before {
+    content: fa-content($fa-var-grip-lines);
+    }
+}
+
+.fa-grip-lines-middle {
+    @extend %fa-icon;
+    @extend .fal;
+
+    vertical-align: middle;
+
+    &:before {
+    content: fa-content($fa-var-grip-lines);
+    }
+}
+
+.fa-grip-lines-bottom {
+    @extend %fa-icon;
+    @extend .fal;
+
+    vertical-align: bottom;
+    line-height: 3px;
+
+    &:before {
+    content: fa-content($fa-var-grip-lines);
+    }
+}
