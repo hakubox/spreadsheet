@@ -8599,16 +8599,18 @@ var XLMLPatternTypeMap = {
 /* 18.8.5 borders CT_Borders */
 function parse_borders(t, styles, themes, opts) {
 	styles.Borders = [];
-	var border = {}/*, sub_border = {}*/;
-	var pass = false;
+	var border = {}, sub_border = {};
+    var pass = false;
+    console.log(t[0]);
 	t[0].match(tagregex).forEach(function(x) {
 		var y = parsexmltag(x);
 		switch(strip_ns(y[0])) {
 			case '<borders': case '<borders>': case '</borders>': break;
 
 			/* 18.8.4 border CT_Border */
-			case '<border': case '<border>': case '<border/>':
-				border = {};
+            case '<border': case '<border>': case '<border/>':
+                border = {};
+                sub_border = '';
 				if (y.diagonalUp) { border.diagonalUp = y.diagonalUp; }
 				if (y.diagonalDown) { border.diagonalDown = y.diagonalDown; }
 				styles.Borders.push(border);
@@ -8617,22 +8619,46 @@ function parse_borders(t, styles, themes, opts) {
 
 			/* note: not in spec, appears to be CT_BorderPr */
 			case '<left/>': break;
-			case '<left': case '<left>': break;
+			case '<left': case '<left>':
+                border.left = {};
+                if(y.style) {
+                    border.left.style = y.style;
+                }
+                sub_border = 'left';
+                break;
 			case '</left>': break;
 
 			/* note: not in spec, appears to be CT_BorderPr */
 			case '<right/>': break;
-			case '<right': case '<right>': break;
+			case '<right': case '<right>':
+                border.right = {};
+                if(y.style) {
+                    border.right.style = y.style;
+                }
+                sub_border = 'right';
+                break;
 			case '</right>': break;
 
 			/* 18.8.43 top CT_BorderPr */
 			case '<top/>': break;
-			case '<top': case '<top>': break;
+			case '<top': case '<top>':
+                border.top = {};
+                if(y.style) {
+                    border.top.style = y.style;
+                }
+                sub_border = 'top';
+                break;
 			case '</top>': break;
 
 			/* 18.8.6 bottom CT_BorderPr */
 			case '<bottom/>': break;
-			case '<bottom': case '<bottom>': break;
+            case '<bottom': case '<bottom>':
+                border.bottom = {};
+                if(y.style) {
+                    border.bottom.style = y.style;
+                }
+                sub_border = 'bottom';
+                break;
 			case '</bottom>': break;
 
 			/* 18.8.13 diagonal CT_BorderPr */
@@ -8656,7 +8682,16 @@ function parse_borders(t, styles, themes, opts) {
 			case '</end>': break;
 
 			/* 18.8.? color CT_Color */
-			case '<color': case '<color>': break;
+            case '<color': case '<color>':
+                if(sub_border) {
+                    if(y.rgb) {
+                        border[sub_border].color = y.rgb;
+                    }
+                    if(y.auto) {
+                        border[sub_border].auto = y.auto;
+                    }
+                }
+                break;
 			case '<color/>': case '</color>': break;
 
 			/* 18.2.10 extLst CT_ExtensionList ? */

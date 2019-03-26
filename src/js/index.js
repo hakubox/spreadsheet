@@ -33,50 +33,7 @@ function fileImport() {
                 persons = persons.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]));
                 console.log(workbook, persons, fromTo);
 
-                //获取数据
-                Object.entries(workbook.Sheets[sheet]).forEach(([key, value]) => {
-                    if(key[0] !== '!') {
-                        let colNo = key.match(/[A-Z]+/g)[0];
-                        let rowNum = tool.stringToNum(colNo) - 1,
-                            colNum = Number(key.substr(colNo.length)) - 1;
-                        spread.setData(colNum, rowNum, value.w);
-                        if(value._s && !isNaN(value._s)) {
-                            let cellXf = workbook.Styles.CellXf[Number(value._s)];
-                            let currentFill = workbook.Styles.Fills[cellXf.fillId];
-                            let currentFont = workbook.Styles.Fonts[cellXf.fontId];
-                            let fontColor = '#000000', backColor = '#FFFFFF';
-                            if(currentFill.fgColor) {
-                                if(currentFill.fgColor.rgb) {
-                                    backColor = currentFill.fgColor.rgb;
-                                } else if(currentFill.fgColor.theme !== undefined) {
-                                    backColor = workbook.Themes.themeElements.clrScheme[currentFill.fgColor.theme].rgb;
-                                }
-                                if(backColor == 'FFFFFF') backColor = '000000';
-                                else if(backColor == '000000') backColor = 'FFFFFF';
-                                if(currentFill.fgColor.tint) {
-                                    backColor = Math.floor(Number('0x' + backColor[0] + backColor[1]) * (1 + currentFill.fgColor.tint)).toString(16).padStart(2, '0') +
-                                                Math.floor(Number('0x' + backColor[2] + backColor[3]) * (1 + currentFill.fgColor.tint)).toString(16).padStart(2, '0') +
-                                                Math.floor(Number('0x' + backColor[4] + backColor[5]) * (1 + currentFill.fgColor.tint)).toString(16).padStart(2, '0');
-                                }
-                                backColor = '#' + backColor;
-                            }
-                            if(currentFont.color) {
-                                if(currentFont.color.rgb) {
-                                    fontColor = currentFont.color.rgb;
-                                } else if(currentFont.color.theme !== undefined) {
-                                    fontColor = workbook.Themes.themeElements.clrScheme[currentFont.color.theme].rgb;
-                                }
-                                if(fontColor == 'FFFFFF') fontColor = '000000';
-                                else if(fontColor == '000000') fontColor = 'FFFFFF';
-                                fontColor = '#' + fontColor;
-                            }
-                            spread.setStyle(colNum, rowNum, {
-                                color: fontColor,
-                                backgroundColor: backColor
-                            })
-                        }
-                    }
-                });
+                tool.workbookResolve(workbook, sheet);
 
 
                 fileSpreadSheet.value = '';
