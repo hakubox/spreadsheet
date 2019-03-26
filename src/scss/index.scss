@@ -275,40 +275,40 @@ body {
                 &.selected-area-left {
                     border-left-color: $--color-main;
                     // padding-left: 0px;
-                    box-shadow: 2px 0px 0 0px white inset;
+                    box-shadow: 1px 0px 0 0px white inset;
 
                     &.selected-area-right {
-                        box-shadow: -2px 0px 0px 0px white inset, 2px 0px 0px 0px white inset, 0px 0px 0px 0px white inset;
+                        box-shadow: -1px 0px 0px 0px white inset, 2px 0px 0px 0px white inset, 0px 0px 0px 0px white inset;
 
                         &.selected-area-bottom {
-                            box-shadow: -2px 0px 0px 0px white inset, 2px 0px 0px 0px white inset, 0px -2px 0px 0px white inset, 0px 0px 0px 0px white inset;
+                            box-shadow: -1px 0px 0px 0px white inset, 2px 0px 0px 0px white inset, 0px -2px 0px 0px white inset, 0px 0px 0px 0px white inset;
                         }
                     }
 
                     &.selected-area-top {
                         border-top-left-radius: 4px;
-                        box-shadow: 2px 2px 0 0 white inset;
+                        box-shadow: 1px 1px 0 0 white inset;
                     }
 
                     &.selected-area-bottom {
                         border-bottom-left-radius: 4px;
-                        box-shadow: 1px -1px 0px 1px white inset;
+                        box-shadow: 0px -0px 0px 1px white inset;
                     }
                 }
                 //选框：右
                 &.selected-area-right {
                     border-right-color: $--color-main;
                     // padding-right: 0px;
-                    box-shadow: -2px 0px 0 0px white inset;
+                    box-shadow: -1px 0px 0 0px white inset;
 
                     &.selected-area-top {
                         border-top-right-radius: 4px;
-                        box-shadow: -1px 1px 0px 1px white inset;
+                        box-shadow: -0px 0px 0px 1px white inset;
                     }
 
                     &.selected-area-bottom {
                         border-bottom-right-radius: 4px;
-                        box-shadow: -1px -1px 0px 1px white inset;
+                        box-shadow: -0px -0px 0px 1px white inset;
 
                         &:after {
                             opacity: 1;
@@ -319,13 +319,13 @@ body {
                 &.selected-area-top {
                     border-top-color: $--color-main;
                     // padding-top: 0px;
-                    box-shadow: 0px 2px 0 0px white inset;
+                    box-shadow: 0px 1px 0 0px white inset;
                 }
                 //选框：下
                 &.selected-area-bottom {
                     border-bottom-color: $--color-main;
                     // padding-bottom: 0px;
-                    box-shadow: 0px -2px 0 0px white inset;
+                    box-shadow: 0px -1px 0 0px white inset;
                 }
 
                 //选框：原始位置

@@ -92,6 +92,23 @@ fileSpreadSheet.addEventListener('change', fileImport);
 //顶部工具栏
 let toolmenu = new ToolMenu({
     menus: [
+        /*
+
+            function 函数
+            info-square 信息
+            lock-alt lock-open-alt 锁定/解锁
+            paperclip unlink 超链接/删除链接
+            plus-square 添加新文档
+            share-alt 共享
+            sign-in-alt sign-out-alt 登入/登出
+            sliders-h 设置
+            sort sort-down sort-up 排序
+            spinner spinner-third 转动动画
+            terminal 控制台
+            trash-alt 垃圾桶
+            layer-group layer-minus layer-plus 多层/减少层/增加层
+            filter 筛选
+        */
         {
             text: '打开',
             key: 'ctrl+c',
